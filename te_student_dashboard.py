@@ -48,13 +48,10 @@ def info_box(text: str):
         unsafe_allow_html=True,
     )
 
-def save_banner(next_page: str):
-    st.markdown(
-        f"<div style='background:#e8f5e9;border-left:4px solid #2e7d32;"
-        f"padding:10px 14px;border-radius:6px;margin-top:8px;'>"
-        f"✅ <b>Saved!</b> Now go to <b>{next_page}</b> in the sidebar to continue.</div>",
-        unsafe_allow_html=True,
-    )
+def go_to_page(name: str):
+    """Save target page to session state and rerun — sidebar selectbox will follow."""
+    st.session_state["_current_page"] = name
+    st.rerun()
 
 def formula_box(title: str, formula: str, example: str = ""):
     content = (
@@ -99,6 +96,8 @@ DEFAULTS = {
     "nonpv_growth": 4.0,
     # Calculated flag
     "calculated": False,
+    # Navigation
+    "_current_page": "🏠 Welcome",
 }
 
 for k, v in DEFAULTS.items():
@@ -118,7 +117,13 @@ PAGES = [
     "📊 Results & Gap",
     "♻️ Circular Economy",
 ]
-page = st.sidebar.selectbox("Navigate to", PAGES)
+
+# Session-state-driven navigation so go_to_page() works instantly
+_idx = PAGES.index(st.session_state["_current_page"]) if st.session_state["_current_page"] in PAGES else 0
+page = st.sidebar.selectbox("Navigate to", PAGES, index=_idx, key="_nav_select")
+# Sync back if user manually clicks sidebar
+if page != st.session_state["_current_page"]:
+    st.session_state["_current_page"] = page
 
 st.sidebar.divider()
 st.sidebar.markdown(
@@ -304,7 +309,7 @@ elif page == "👤 Student Info":
             st.session_state["start_year"] = int(sy)
             st.session_state["end_year"] = int(ey)
             st.session_state["calculated"] = False
-            save_banner("Material Supply")
+            go_to_page("⛏️ Material Supply")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Material Supply
@@ -395,7 +400,7 @@ elif page == "⛏️ Material Supply":
         st.session_state["mine_base_production"] = mine_base
         st.session_state["mine_growth_rate"] = mine_gr
         st.session_state["calculated"] = False
-        save_banner("Material Demand")
+        go_to_page("☀️ Material Demand")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Material Demand
@@ -529,7 +534,7 @@ elif page == "☀️ Material Demand":
         st.session_state["nonpv_base"] = npv_base
         st.session_state["nonpv_growth"] = npv_gr
         st.session_state["calculated"] = False
-        save_banner("Results & Gap")
+        go_to_page("📊 Results & Gap")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Results & Gap
@@ -830,7 +835,7 @@ elif page == "♻️ Circular Economy":
         st.session_state["rec_collection"]   = rec_col
         st.session_state["rec_rate"]         = rec_rate
         st.session_state["calculated"]       = False
-        st.success("Recycling inputs saved! Go to **Results & Gap** to see the updated chart.")
+        go_to_page("📊 Results & Gap")
 
     # Quick comparison: with vs without recycling
     sy = st.session_state["start_year"]

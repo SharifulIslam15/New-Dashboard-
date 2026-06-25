@@ -97,7 +97,7 @@ DEFAULTS = {
     # Calculated flag
     "calculated": False,
     # Navigation
-    "_current_page": "Welcome",
+    "_current_page": "🏠 Welcome",
 }
 
 for k, v in DEFAULTS.items():
@@ -106,7 +106,6 @@ for k, v in DEFAULTS.items():
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
 st.sidebar.title("Material Availability Dashboard")
-st.sidebar.caption("")
 st.sidebar.divider()
 
 PAGES = [
@@ -141,15 +140,15 @@ st.sidebar.markdown(
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Welcome
 # ─────────────────────────────────────────────────────────────────────────────
-if page == "Welcome":
+if page == "🏠 Welcome":
     col_a, col_b = st.columns([1.2, 1])
 
     with col_a:
         st.markdown(
             "<h1 style='color:#1b5e20;font-size:32px;margin-bottom:4px;'>"
-            "🌞 Tellurium Supply & Demand</h1>"
+            "🌞 Material Availability Dashboard</h1>"
             "<h3 style='color:#388e3c;font-weight:400;margin-top:0;'>"
-            "Interactive Student Dashboard</h3>",
+            "Tellurium (Te) for CdTe Solar</h3>",
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -229,7 +228,7 @@ if page == "Welcome":
         # Linear boxes
         _rect(0.1, 8.0, 2.1, 8.9, "#ef9a9a", "#b71c1c")
         _label(1.1, 8.5, "<b>Extract</b>", "#b71c1c", 11)
-        _label(1.1, 8.15,"(Mine/Byproduct Te)", "#b71c1c", 9)
+        _label(1.1, 8.15,"(mine Te)", "#b71c1c", 9)
 
         _rect(3.0, 8.0, 5.4, 8.9, "#ffe082", "#e65100")
         _label(4.2, 8.5, "<b>Manufacture</b>", "#e65100", 11)

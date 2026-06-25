@@ -6,7 +6,7 @@ import plotly.express as px
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Tellurium Supply & Demand – Student Dashboard",
+    page_title="Material Availability Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -97,7 +97,7 @@ DEFAULTS = {
     # Calculated flag
     "calculated": False,
     # Navigation
-    "_current_page": "🏠 Welcome",
+    "_current_page": "Welcome",
 }
 
 for k, v in DEFAULTS.items():
@@ -105,8 +105,8 @@ for k, v in DEFAULTS.items():
         st.session_state[k] = v
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
-st.sidebar.title("📊 Te Supply & Demand Dashboard")
-st.sidebar.caption("ENE 371 · Sustainable Civil & Environmental Systems")
+st.sidebar.title("Material Availability Dashboard")
+st.sidebar.caption("")
 st.sidebar.divider()
 
 PAGES = [
@@ -141,7 +141,7 @@ st.sidebar.markdown(
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Welcome
 # ─────────────────────────────────────────────────────────────────────────────
-if page == "🏠 Welcome":
+if page == "Welcome":
     col_a, col_b = st.columns([1.2, 1])
 
     with col_a:
@@ -229,7 +229,7 @@ if page == "🏠 Welcome":
         # Linear boxes
         _rect(0.1, 8.0, 2.1, 8.9, "#ef9a9a", "#b71c1c")
         _label(1.1, 8.5, "<b>Extract</b>", "#b71c1c", 11)
-        _label(1.1, 8.15,"(mine Te)", "#b71c1c", 9)
+        _label(1.1, 8.15,"(Mine/Byproduct Te)", "#b71c1c", 9)
 
         _rect(3.0, 8.0, 5.4, 8.9, "#ffe082", "#e65100")
         _label(4.2, 8.5, "<b>Manufacture</b>", "#e65100", 11)

@@ -260,7 +260,7 @@ if page == "🏠 Welcome":
         # Row 2 (y≈3.5): Recovered | Collect | End of Life
         _cx = [1.2, 5.0, 8.8,   8.8, 5.0, 1.2]
         _cy = [5.8, 5.8, 5.8,   3.5, 3.5, 3.5]
-        _clabels = ["Mine<br>(less!)", "Manufacture<br>PV Panel", "In Use<br>25+ yrs",
+        _clabels = ["Mining/<br>Byproduct", "Manufacture<br>PV Panel", "In Use<br>25+ yrs",
                     "End of<br>Life", "Collect &<br>Recycle Te", "Recovered<br>Material"]
         _cfill   = ["#ef9a9a","#ffe082","#a5d6a7","#ce93d8","#80cbc4","#b2dfdb"]
         _cline   = ["#b71c1c","#e65100","#2e7d32","#7b1fa2","#004d40","#00695c"]
@@ -527,36 +527,7 @@ elif page == "🔗 Hitchhiker Concept":
 
     st.plotly_chart(_fig_hh, use_container_width=True)
 
-    # ── Potentially limited resources table ───────────────────────────────────
-    st.divider()
-    st.subheader("Where Te Sits Among Limited Resources")
-    st.markdown(
-        "<p style='font-size:14px;'>Resources can be limited for different reasons. "
-        "Tellurium falls into the most constrained category — <b>hitchhiker availability only</b>.</p>",
-        unsafe_allow_html=True,
-    )
 
-    _categories = [
-        ("Resource appears small relative to annual extraction",
-         "Au, Cu, Zn, PGMs", "#fff9c4", "#f57f17"),
-        ("Resource appears small AND no obvious substitutes",
-         "In, Re, Eu, Hf, Er", "#ffe0b2", "#e65100"),
-        ("Hitchhiker availability only ← Te is here",
-         "Cd, Ga, <b>Te</b>, In, Re", "#ffcdd2", "#c62828"),
-        ("Very large energy requirements",
-         "Al, Ti", "#e8eaf6", "#3949ab"),
-    ]
-    for cat, examples, bg, border in _categories:
-        st.markdown(
-            f"<div style='display:flex;align-items:center;background:{bg};"
-            f"border-left:5px solid {border};border-radius:6px;"
-            f"padding:10px 14px;margin-bottom:8px;gap:14px;'>"
-            f"<div style='flex:2;font-size:13px;color:#333;'>{cat}</div>"
-            f"<div style='flex:1;font-size:13px;font-weight:600;color:{border};'>{examples}</div>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-    st.caption("Source: BP (2014) — Materials critical to the energy industry (Zepf et al.)")
 
     st.divider()
     if st.button("Continue to Material Supply →"):

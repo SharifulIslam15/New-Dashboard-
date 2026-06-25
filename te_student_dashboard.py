@@ -112,6 +112,7 @@ st.sidebar.divider()
 PAGES = [
     "🏠 Welcome",
     "👤 Student Info",
+    "🔗 Hitchhiker Concept",
     "⛏️ Material Supply",
     "☀️ Material Demand",
     "📊 Results & Gap",
@@ -129,10 +130,11 @@ st.sidebar.divider()
 st.sidebar.markdown(
     "<small style='color:#2e7d32;font-weight:600;'>How to use</small><br>"
     "<small>1. Enter your name on <b>Student Info</b><br>"
-    "2. Set supply parameters<br>"
-    "3. Set demand parameters<br>"
-    "4. View <b>Results & Gap</b><br>"
-    "5. Explore <b>Circular Economy</b></small>",
+    "2. Learn the <b>Hitchhiker Concept</b><br>"
+    "3. Set supply parameters<br>"
+    "4. Set demand parameters<br>"
+    "5. View <b>Results & Gap</b><br>"
+    "6. Explore <b>Circular Economy</b></small>",
     unsafe_allow_html=True,
 )
 
@@ -161,11 +163,12 @@ if page == "🏠 Welcome":
 
         st.markdown("<h3>What you will learn</h3>", unsafe_allow_html=True)
         steps = [
-            ("1", "Why Tellurium is a critical & hitchhiker resource"),
-            ("2", "How supply comes from direct mining and copper by-production"),
-            ("3", "How PV demand and non-PV demand are calculated"),
-            ("4", "What the supply–demand gap means (surplus vs. shortage)"),
-            ("5", "How recycling (Circular Economy) changes the picture"),
+            ("1", "Why Tellurium is a critical material"),
+            ("2", "What makes it a Hitchhiker resource (Cu &amp; Ni hosts)"),
+            ("3", "How supply comes from direct mining and copper by-production"),
+            ("4", "How PV demand and non-PV demand are calculated"),
+            ("5", "What the supply–demand gap means (surplus vs. shortage)"),
+            ("6", "How recycling (Circular Economy) changes the picture"),
         ]
         for num, desc in steps:
             st.markdown(
@@ -182,65 +185,71 @@ if page == "🏠 Welcome":
                  "Enter your name on <b>Student Info</b> first.")
 
     with col_b:
-        st.markdown("<h3 style='color:#2e7d32;'>Circular Economy Concept</h3>", unsafe_allow_html=True)
-        st.markdown("""
-        <svg viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg" width="100%">
-          <defs>
-            <marker id="a1" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
-              <polygon points="0 0, 9 3, 0 6" fill="#1b5e20"/>
-            </marker>
-            <marker id="a2" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
-              <polygon points="0 0, 9 3, 0 6" fill="#1565c0"/>
-            </marker>
-          </defs>
-          <rect width="400" height="430" fill="#f9fbe7" rx="14"/>
-          <text x="200" y="22" text-anchor="middle" font-size="12" font-weight="bold"
-                fill="#1b5e20" font-family="Arial">LINEAR vs CIRCULAR ECONOMY</text>
-          <text x="14" y="46" font-size="9" fill="#888" font-family="Arial" font-weight="bold">LINEAR (take → make → dispose)</text>
-          <rect x="12" y="54" width="60" height="30" rx="5" fill="#ef9a9a"/>
-          <text x="42" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="#b71c1c" font-family="Arial">Extract</text>
-          <line x1="72" y1="69" x2="84" y2="69" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
-          <rect x="84" y="54" width="72" height="30" rx="5" fill="#ffe082"/>
-          <text x="120" y="66" text-anchor="middle" font-size="9" font-weight="bold" fill="#e65100" font-family="Arial">Manufacture</text>
-          <text x="120" y="77" text-anchor="middle" font-size="8" fill="#e65100" font-family="Arial">PV Panels</text>
-          <line x1="156" y1="69" x2="168" y2="69" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
-          <rect x="168" y="54" width="54" height="30" rx="5" fill="#a5d6a7"/>
-          <text x="195" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="#1b5e20" font-family="Arial">In Use</text>
-          <line x1="222" y1="69" x2="234" y2="69" stroke="#555" stroke-width="1.5" marker-end="url(#a1)"/>
-          <rect x="234" y="54" width="68" height="30" rx="5" fill="#b0bec5"/>
-          <text x="268" y="66" text-anchor="middle" font-size="9" font-weight="bold" fill="#37474f" font-family="Arial">Dispose</text>
-          <text x="268" y="77" text-anchor="middle" font-size="8" fill="#37474f" font-family="Arial">(Landfill)</text>
-          <text x="318" y="73" font-size="16" fill="#c62828" font-weight="bold" font-family="Arial">✕</text>
-          <line x1="14" y1="100" x2="386" y2="100" stroke="#ccc" stroke-width="0.8"/>
-          <text x="14" y="118" font-size="9" fill="#888" font-family="Arial" font-weight="bold">CIRCULAR (keep materials in use)</text>
-          <rect x="14" y="132" width="80" height="38" rx="6" fill="#ef9a9a"/>
-          <text x="54" y="147" text-anchor="middle" font-size="9" font-weight="bold" fill="#b71c1c" font-family="Arial">Extract / Mine</text>
-          <text x="54" y="160" text-anchor="middle" font-size="8" fill="#b71c1c" font-family="Arial">Virgin material</text>
-          <rect x="306" y="132" width="80" height="38" rx="6" fill="#ffe082"/>
-          <text x="346" y="147" text-anchor="middle" font-size="9" font-weight="bold" fill="#e65100" font-family="Arial">Manufacture</text>
-          <text x="346" y="160" text-anchor="middle" font-size="8" fill="#e65100" font-family="Arial">PV Panels</text>
-          <rect x="316" y="248" width="76" height="38" rx="6" fill="#a5d6a7"/>
-          <text x="354" y="263" text-anchor="middle" font-size="9" font-weight="bold" fill="#1b5e20" font-family="Arial">In Use</text>
-          <text x="354" y="276" text-anchor="middle" font-size="8" fill="#1b5e20" font-family="Arial">25+ years</text>
-          <rect x="152" y="350" width="96" height="38" rx="6" fill="#ce93d8"/>
-          <text x="200" y="365" text-anchor="middle" font-size="9" font-weight="bold" fill="#4a148c" font-family="Arial">End of Life</text>
-          <text x="200" y="378" text-anchor="middle" font-size="8" fill="#4a148c" font-family="Arial">Collection</text>
-          <rect x="8" y="248" width="80" height="38" rx="6" fill="#80cbc4"/>
-          <text x="48" y="263" text-anchor="middle" font-size="9" font-weight="bold" fill="#004d40" font-family="Arial">Recycle / Reuse</text>
-          <text x="48" y="276" text-anchor="middle" font-size="8" fill="#004d40" font-family="Arial">Recover Te</text>
-          <path d="M 94 148 Q 200 128 306 148" fill="none" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a1)"/>
-          <text x="200" y="133" text-anchor="middle" font-size="8" fill="#1b5e20" font-family="Arial">material input</text>
-          <path d="M 348 170 Q 358 210 354 248" fill="none" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a1)"/>
-          <path d="M 330 286 Q 298 330 252 358" fill="none" stroke="#1b5e20" stroke-width="1.8" marker-end="url(#a1)"/>
-          <text x="310" y="335" text-anchor="middle" font-size="8" fill="#555" font-family="Arial">retire</text>
-          <path d="M 152 369 Q 100 372 88 286" fill="none" stroke="#1565c0" stroke-width="2.5" marker-end="url(#a2)"/>
-          <text x="94" y="358" text-anchor="middle" font-size="8" fill="#1565c0" font-family="Arial">recycle</text>
-          <path d="M 88 248 Q 88 195 306 162" fill="none" stroke="#1565c0" stroke-width="2.5" marker-end="url(#a2)"/>
-          <text x="170" y="196" text-anchor="middle" font-size="8" fill="#1565c0" font-family="Arial">recovered material</text>
-          <rect x="118" y="208" width="164" height="24" rx="10" fill="#1565c0"/>
-          <text x="200" y="224" text-anchor="middle" font-size="9" font-weight="bold" fill="white" font-family="Arial">CE loop — reduces virgin mining</text>
-        </svg>
-        """, unsafe_allow_html=True)
+        st.markdown("<h3 style='color:#2e7d32;'>Linear vs. Circular Economy</h3>", unsafe_allow_html=True)
+        import plotly.graph_objects as _go
+        _fig_ce = _go.Figure()
+        # Linear flow: nodes as a Sankey-style annotation chart
+        _fig_ce.add_shape(type="rect", x0=0.02, y0=0.78, x1=0.18, y1=0.92,
+                          fillcolor="#ef9a9a", line_color="#b71c1c", line_width=1.5)
+        _fig_ce.add_annotation(x=0.10, y=0.85, text="<b>Extract</b>", showarrow=False,
+                               font=dict(size=11, color="#b71c1c"))
+        _fig_ce.add_annotation(x=0.28, y=0.85, text="→", showarrow=False,
+                               font=dict(size=18, color="#555"))
+        _fig_ce.add_shape(type="rect", x0=0.35, y0=0.78, x1=0.57, y1=0.92,
+                          fillcolor="#ffe082", line_color="#e65100", line_width=1.5)
+        _fig_ce.add_annotation(x=0.46, y=0.88, text="<b>Manufacture</b>", showarrow=False,
+                               font=dict(size=11, color="#e65100"))
+        _fig_ce.add_annotation(x=0.46, y=0.82, text="PV Panels", showarrow=False,
+                               font=dict(size=10, color="#e65100"))
+        _fig_ce.add_annotation(x=0.67, y=0.85, text="→", showarrow=False,
+                               font=dict(size=18, color="#555"))
+        _fig_ce.add_shape(type="rect", x0=0.72, y0=0.78, x1=0.88, y1=0.92,
+                          fillcolor="#a5d6a7", line_color="#2e7d32", line_width=1.5)
+        _fig_ce.add_annotation(x=0.80, y=0.85, text="<b>In Use</b>", showarrow=False,
+                               font=dict(size=11, color="#2e7d32"))
+        _fig_ce.add_annotation(x=0.93, y=0.85, text="→ 🗑", showarrow=False,
+                               font=dict(size=14, color="#c62828"))
+        _fig_ce.add_annotation(x=0.50, y=0.96, text="<b>LINEAR</b>: Extract → Make → Dispose",
+                               showarrow=False, font=dict(size=12, color="#555"))
+        # Divider
+        _fig_ce.add_shape(type="line", x0=0, y0=0.72, x1=1, y1=0.72,
+                          line=dict(color="#ccc", width=1, dash="dot"))
+        # Circular flow
+        _fig_ce.add_annotation(x=0.50, y=0.66, text="<b>CIRCULAR</b>: Keep materials in use",
+                               showarrow=False, font=dict(size=12, color="#1565c0"))
+        nodes_x =  [0.10, 0.46, 0.82, 0.82, 0.46, 0.10]
+        nodes_y =  [0.55, 0.55, 0.55, 0.30, 0.10, 0.30]
+        node_labels = ["Mine<br>(less!)", "Manufacture<br>PV Panel", "In Use<br>25+ yrs",
+                       "End of<br>Life", "Collect &<br>Recycle Te", "Recovered<br>Material"]
+        node_colors = ["#ef9a9a","#ffe082","#a5d6a7","#ce93d8","#80cbc4","#b2dfdb"]
+        node_text_colors = ["#b71c1c","#e65100","#1b5e20","#4a148c","#004d40","#004d40"]
+        for i,(nx,ny,lbl,bg,tc) in enumerate(zip(nodes_x,nodes_y,node_labels,node_colors,node_text_colors)):
+            _fig_ce.add_shape(type="rect", x0=nx-0.10, y0=ny-0.08, x1=nx+0.10, y1=ny+0.08,
+                              fillcolor=bg, line_color=tc, line_width=1.5)
+            _fig_ce.add_annotation(x=nx, y=ny, text=f"<b>{lbl}</b>", showarrow=False,
+                                   font=dict(size=10, color=tc), align="center")
+        # Arrows between circular nodes
+        arrows = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,1)]
+        for (s,e) in arrows:
+            _fig_ce.add_annotation(
+                x=nodes_x[e], y=nodes_y[e]+0.08,
+                ax=nodes_x[s], ay=nodes_y[s]-0.08,
+                xref="paper", yref="paper", axref="paper", ayref="paper",
+                showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=2,
+                arrowcolor="#1565c0"
+            )
+        # CE loop label
+        _fig_ce.add_annotation(x=0.50, y=0.20, text="♻️  CE loop reduces virgin mining",
+                               showarrow=False, font=dict(size=11, color="#1565c0"),
+                               bgcolor="#e3f2fd", bordercolor="#1565c0", borderwidth=1)
+        _fig_ce.update_layout(
+            xaxis=dict(visible=False, range=[0,1]),
+            yaxis=dict(visible=False, range=[0,1.02]),
+            plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+            margin=dict(l=0, r=0, t=5, b=5),
+            height=420,
+        )
+        st.plotly_chart(_fig_ce, use_container_width=True)
 
     st.markdown(
         "<div style='background:#2e7d32;padding:16px 24px;border-radius:10px;"
@@ -309,10 +318,206 @@ elif page == "👤 Student Info":
             st.session_state["start_year"] = int(sy)
             st.session_state["end_year"] = int(ey)
             st.session_state["calculated"] = False
-            go_to_page("⛏️ Material Supply")
+            go_to_page("🔗 Hitchhiker Concept")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: Material Supply
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE: Hitchhiker Concept
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "🔗 Hitchhiker Concept":
+    st.header("Hitchhiker Resources", divider="grey")
+    info_box(
+        "Before calculating supply and demand, it is essential to understand <b>why Tellurium supply "
+        "is so constrained</b>. The answer lies in how it occurs in nature."
+    )
+
+    # ── Definition ────────────────────────────────────────────────────────────
+    st.markdown(
+        "<div style='background:#1b5e20;padding:18px 24px;border-radius:10px;margin-bottom:16px;'>"
+        "<p style='color:#fff;font-size:16px;font-weight:700;margin:0 0 8px 0;'>"
+        "🔗 What is a Hitchhiker Resource?</p>"
+        "<p style='color:#e8f5e9;font-size:14px;line-height:1.8;margin:0;'>"
+        "A <b>hitchhiker (or co-occurring) resource</b> is one whose access may be either "
+        "<i>diminished or enhanced</i> by a change in the production of some <b>other commodity</b>. "
+        "The hitchhiker element has no primary mine of its own — it "
+        "<i>hitches a ride</i> on the production of a host metal."
+        "</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ── Two host metals side by side ──────────────────────────────────────────
+    st.subheader("The Two Main Hosts of Tellurium")
+    st.markdown(
+        "<p style='font-size:14px;'>Tellurium occurs naturally bonded with two host metals. "
+        "When those metals are refined, Te can be extracted as a byproduct.</p>",
+        unsafe_allow_html=True,
+    )
+
+    col_cu, col_ni = st.columns(2)
+
+    with col_cu:
+        st.markdown(
+            "<div style='background:#fff8e1;border:2px solid #f9a825;border-radius:10px;"
+            "padding:16px;min-height:280px;'>"
+            "<div style='font-size:36px;text-align:center;'>🟠</div>"
+            "<h4 style='color:#e65100;text-align:center;margin:8px 0;'>Copper (Cu)</h4>"
+            "<p style='font-size:13px;line-height:1.8;color:#333;'>"
+            "<b>Primary host.</b> Copper electrorefining is the <b>dominant source</b> of Te globally. "
+            "During refining, copper ore is purified in large electrolytic cells. "
+            "Te concentrates in the <i>anode slimes</i> (residue left on the anode), "
+            "from which it can be extracted.</p>"
+            "<div style='background:#fff3cd;border-radius:6px;padding:8px 12px;margin-top:10px;'>"
+            "<p style='font-size:12px;margin:0;color:#856404;'>"
+            "⚡ Typical Te content: <b>~110 ppm</b> in copper anode<br>"
+            "🏭 Accounts for <b>~75–80%</b> of world Te supply"
+            "</p></div></div>",
+            unsafe_allow_html=True,
+        )
+
+    with col_ni:
+        st.markdown(
+            "<div style='background:#e8eaf6;border:2px solid #3949ab;border-radius:10px;"
+            "padding:16px;min-height:280px;'>"
+            "<div style='font-size:36px;text-align:center;'>⚫</div>"
+            "<h4 style='color:#1a237e;text-align:center;margin:8px 0;'>Nickel (Ni)</h4>"
+            "<p style='font-size:13px;line-height:1.8;color:#333;'>"
+            "<b>Secondary host.</b> Some nickel ores also contain tellurium. "
+            "In regions where nickel sulfide deposits are processed, Te is recovered "
+            "as a secondary byproduct. This source is smaller but adds to the "
+            "total available supply, especially in Canada and Russia.</p>"
+            "<div style='background:#c5cae9;border-radius:6px;padding:8px 12px;margin-top:10px;'>"
+            "<p style='font-size:12px;margin:0;color:#1a237e;'>"
+            "🌍 Notable regions: <b>Canada, Russia, South Africa</b><br>"
+            "📊 Accounts for <b>~5–15%</b> of world Te supply"
+            "</p></div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ── Consequence diagram ───────────────────────────────────────────────────
+    st.subheader("Why This Matters — The Supply Constraint")
+    st.markdown(
+        "<p style='font-size:14px;'>Because Te is a hitchhiker, its supply is <b>not driven by "
+        "Te demand</b> — it is driven by <b>copper and nickel production</b>. "
+        "Even if Te demand doubles (e.g. due to more CdTe solar), Te supply cannot "
+        "simply be ramped up without producing more copper or nickel first.</p>",
+        unsafe_allow_html=True,
+    )
+
+    import plotly.graph_objects as _go2
+    _fig_hh = _go2.Figure()
+
+    # Background
+    _fig_hh.update_layout(
+        xaxis=dict(visible=False, range=[0, 10]),
+        yaxis=dict(visible=False, range=[0, 5]),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        margin=dict(l=10, r=10, t=10, b=10),
+        height=260,
+    )
+
+    # Cu box
+    _fig_hh.add_shape(type="rect", x0=0.2, y0=1.8, x1=2.8, y1=3.2,
+                      fillcolor="#ffe082", line_color="#f9a825", line_width=2)
+    _fig_hh.add_annotation(x=1.5, y=2.7, text="<b>Copper Mining</b>", showarrow=False,
+                            font=dict(size=13, color="#e65100"))
+    _fig_hh.add_annotation(x=1.5, y=2.3, text="& Electrorefining", showarrow=False,
+                            font=dict(size=11, color="#e65100"))
+
+    # Ni box
+    _fig_hh.add_shape(type="rect", x0=0.2, y0=0.3, x1=2.8, y1=1.6,
+                      fillcolor="#c5cae9", line_color="#3949ab", line_width=2)
+    _fig_hh.add_annotation(x=1.5, y=1.1, text="<b>Nickel Mining</b>", showarrow=False,
+                            font=dict(size=13, color="#1a237e"))
+    _fig_hh.add_annotation(x=1.5, y=0.65, text="& Refining", showarrow=False,
+                            font=dict(size=11, color="#1a237e"))
+
+    # Arrow Cu → Te
+    _fig_hh.add_annotation(x=4.5, y=2.7, ax=2.8, ay=2.7,
+                            xref="x", yref="y", axref="x", ayref="y",
+                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#f9a825",
+                            text="")
+    _fig_hh.add_annotation(x=3.65, y=2.9, text="anode slimes", showarrow=False,
+                            font=dict(size=10, color="#e65100"))
+
+    # Arrow Ni → Te
+    _fig_hh.add_annotation(x=4.5, y=1.1, ax=2.8, ay=1.1,
+                            xref="x", yref="y", axref="x", ayref="y",
+                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#3949ab",
+                            text="")
+    _fig_hh.add_annotation(x=3.65, y=1.3, text="residues", showarrow=False,
+                            font=dict(size=10, color="#1a237e"))
+
+    # Te supply box
+    _fig_hh.add_shape(type="rect", x0=4.5, y0=1.3, x1=7.0, y1=2.7,
+                      fillcolor="#a5d6a7", line_color="#2e7d32", line_width=2)
+    _fig_hh.add_annotation(x=5.75, y=2.2, text="<b>Tellurium (Te)</b>", showarrow=False,
+                            font=dict(size=13, color="#1b5e20"))
+    _fig_hh.add_annotation(x=5.75, y=1.75, text="supply pool", showarrow=False,
+                            font=dict(size=11, color="#1b5e20"))
+
+    # Arrow Te → CdTe
+    _fig_hh.add_annotation(x=9.2, y=2.0, ax=7.0, ay=2.0,
+                            xref="x", yref="y", axref="x", ayref="y",
+                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#2e7d32",
+                            text="")
+
+    # CdTe PV box
+    _fig_hh.add_shape(type="rect", x0=7.2, y0=1.3, x1=9.8, y1=2.7,
+                      fillcolor="#b2ebf2", line_color="#00838f", line_width=2)
+    _fig_hh.add_annotation(x=8.5, y=2.2, text="<b>CdTe Solar</b>", showarrow=False,
+                            font=dict(size=13, color="#006064"))
+    _fig_hh.add_annotation(x=8.5, y=1.75, text="panels", showarrow=False,
+                            font=dict(size=11, color="#006064"))
+
+    # Key constraint label
+    _fig_hh.add_annotation(
+        x=5.75, y=3.5,
+        text="⚠️  Te supply is controlled by Cu & Ni output, not by Te demand",
+        showarrow=False, font=dict(size=11, color="#c62828"),
+        bgcolor="#ffebee", bordercolor="#c62828", borderwidth=1,
+    )
+
+    st.plotly_chart(_fig_hh, use_container_width=True)
+
+    # ── Potentially limited resources table ───────────────────────────────────
+    st.divider()
+    st.subheader("Where Te Sits Among Limited Resources")
+    st.markdown(
+        "<p style='font-size:14px;'>Resources can be limited for different reasons. "
+        "Tellurium falls into the most constrained category — <b>hitchhiker availability only</b>.</p>",
+        unsafe_allow_html=True,
+    )
+
+    _categories = [
+        ("Resource appears small relative to annual extraction",
+         "Au, Cu, Zn, PGMs", "#fff9c4", "#f57f17"),
+        ("Resource appears small AND no obvious substitutes",
+         "In, Re, Eu, Hf, Er", "#ffe0b2", "#e65100"),
+        ("Hitchhiker availability only ← Te is here",
+         "Cd, Ga, <b>Te</b>, In, Re", "#ffcdd2", "#c62828"),
+        ("Very large energy requirements",
+         "Al, Ti", "#e8eaf6", "#3949ab"),
+    ]
+    for cat, examples, bg, border in _categories:
+        st.markdown(
+            f"<div style='display:flex;align-items:center;background:{bg};"
+            f"border-left:5px solid {border};border-radius:6px;"
+            f"padding:10px 14px;margin-bottom:8px;gap:14px;'>"
+            f"<div style='flex:2;font-size:13px;color:#333;'>{cat}</div>"
+            f"<div style='flex:1;font-size:13px;font-weight:600;color:{border};'>{examples}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    st.caption("Source: BP (2014) — Materials critical to the energy industry (Zepf et al.)")
+
+    st.divider()
+    if st.button("Continue to Material Supply →"):
+        go_to_page("⛏️ Material Supply")
+
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "⛏️ Material Supply":
     st.header("Material Supply", divider="grey")

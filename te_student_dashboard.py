@@ -187,68 +187,113 @@ if page == "🏠 Welcome":
     with col_b:
         st.markdown("<h3 style='color:#2e7d32;'>Linear vs. Circular Economy</h3>", unsafe_allow_html=True)
         import plotly.graph_objects as _go
+
+        # ── Use data coordinates throughout (xref/yref="x"/"y") ─────────────
+        # All shapes, annotations, and scatter arrows live in the same x[0,10] y[0,10] space.
         _fig_ce = _go.Figure()
-        # Linear flow: nodes as a Sankey-style annotation chart
-        _fig_ce.add_shape(type="rect", x0=0.02, y0=0.78, x1=0.18, y1=0.92,
-                          fillcolor="#ef9a9a", line_color="#b71c1c", line_width=1.5)
-        _fig_ce.add_annotation(x=0.10, y=0.85, text="<b>Extract</b>", showarrow=False,
-                               font=dict(size=11, color="#b71c1c"))
-        _fig_ce.add_annotation(x=0.28, y=0.85, text="→", showarrow=False,
-                               font=dict(size=18, color="#555"))
-        _fig_ce.add_shape(type="rect", x0=0.35, y0=0.78, x1=0.57, y1=0.92,
-                          fillcolor="#ffe082", line_color="#e65100", line_width=1.5)
-        _fig_ce.add_annotation(x=0.46, y=0.88, text="<b>Manufacture</b>", showarrow=False,
-                               font=dict(size=11, color="#e65100"))
-        _fig_ce.add_annotation(x=0.46, y=0.82, text="PV Panels", showarrow=False,
-                               font=dict(size=10, color="#e65100"))
-        _fig_ce.add_annotation(x=0.67, y=0.85, text="→", showarrow=False,
-                               font=dict(size=18, color="#555"))
-        _fig_ce.add_shape(type="rect", x0=0.72, y0=0.78, x1=0.88, y1=0.92,
-                          fillcolor="#a5d6a7", line_color="#2e7d32", line_width=1.5)
-        _fig_ce.add_annotation(x=0.80, y=0.85, text="<b>In Use</b>", showarrow=False,
-                               font=dict(size=11, color="#2e7d32"))
-        _fig_ce.add_annotation(x=0.93, y=0.85, text="→ 🗑", showarrow=False,
-                               font=dict(size=14, color="#c62828"))
-        _fig_ce.add_annotation(x=0.50, y=0.96, text="<b>LINEAR</b>: Extract → Make → Dispose",
-                               showarrow=False, font=dict(size=12, color="#555"))
-        # Divider
-        _fig_ce.add_shape(type="line", x0=0, y0=0.72, x1=1, y1=0.72,
-                          line=dict(color="#ccc", width=1, dash="dot"))
-        # Circular flow
-        _fig_ce.add_annotation(x=0.50, y=0.66, text="<b>CIRCULAR</b>: Keep materials in use",
-                               showarrow=False, font=dict(size=12, color="#1565c0"))
-        nodes_x =  [0.10, 0.46, 0.82, 0.82, 0.46, 0.10]
-        nodes_y =  [0.55, 0.55, 0.55, 0.30, 0.10, 0.30]
-        node_labels = ["Mine<br>(less!)", "Manufacture<br>PV Panel", "In Use<br>25+ yrs",
-                       "End of<br>Life", "Collect &<br>Recycle Te", "Recovered<br>Material"]
-        node_colors = ["#ef9a9a","#ffe082","#a5d6a7","#ce93d8","#80cbc4","#b2dfdb"]
-        node_text_colors = ["#b71c1c","#e65100","#1b5e20","#4a148c","#004d40","#004d40"]
-        for i,(nx,ny,lbl,bg,tc) in enumerate(zip(nodes_x,nodes_y,node_labels,node_colors,node_text_colors)):
-            _fig_ce.add_shape(type="rect", x0=nx-0.10, y0=ny-0.08, x1=nx+0.10, y1=ny+0.08,
-                              fillcolor=bg, line_color=tc, line_width=1.5)
-            _fig_ce.add_annotation(x=nx, y=ny, text=f"<b>{lbl}</b>", showarrow=False,
-                                   font=dict(size=10, color=tc), align="center")
-        # Arrows between circular nodes
-        arrows = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,1)]
-        for (s,e) in arrows:
-            _fig_ce.add_annotation(
-                x=nodes_x[e], y=nodes_y[e]+0.08,
-                ax=nodes_x[s], ay=nodes_y[s]-0.08,
-                xref="paper", yref="paper", axref="paper", ayref="paper",
-                showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=2,
-                arrowcolor="#1565c0"
-            )
-        # CE loop label
-        _fig_ce.add_annotation(x=0.50, y=0.20, text="♻️  CE loop reduces virgin mining",
-                               showarrow=False, font=dict(size=11, color="#1565c0"),
-                               bgcolor="#e3f2fd", bordercolor="#1565c0", borderwidth=1)
         _fig_ce.update_layout(
-            xaxis=dict(visible=False, range=[0,1]),
-            yaxis=dict(visible=False, range=[0,1.02]),
+            xaxis=dict(visible=False, range=[0, 10]),
+            yaxis=dict(visible=False, range=[0, 10]),
             plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
-            margin=dict(l=0, r=0, t=5, b=5),
-            height=420,
+            margin=dict(l=8, r=8, t=8, b=8),
+            height=430,
+            showlegend=False,
         )
+
+        def _rect(x0,y0,x1,y1,fill,line):
+            _fig_ce.add_shape(type="rect",x0=x0,y0=y0,x1=x1,y1=y1,
+                              fillcolor=fill,line_color=line,line_width=1.8)
+
+        def _label(x,y,txt,color,size=11):
+            _fig_ce.add_annotation(x=x,y=y,text=txt,showarrow=False,
+                                   font=dict(size=size,color=color),xref="x",yref="y",align="center")
+
+        def _arrow(x0,y0,x1,y1,color):
+            # Draw arrow as scatter line ending with marker (triangle)
+            _fig_ce.add_trace(_go.Scatter(
+                x=[x0,x1], y=[y0,y1], mode="lines",
+                line=dict(color=color, width=2.2),
+                hoverinfo="skip",
+            ))
+            # Arrowhead as a triangle marker at the end point
+            _fig_ce.add_trace(_go.Scatter(
+                x=[x1], y=[y1], mode="markers",
+                marker=dict(symbol="arrow", size=12, color=color,
+                            angleref="previous", angle=0),
+                hoverinfo="skip",
+            ))
+
+        # ── Section label: LINEAR ─────────────────────────────────────────────
+        _label(5, 9.5, "<b>LINEAR — take → make → dispose</b>", "#555", 12)
+
+        # Linear boxes
+        _rect(0.1, 8.0, 2.1, 8.9, "#ef9a9a", "#b71c1c")
+        _label(1.1, 8.5, "<b>Extract</b>", "#b71c1c", 11)
+        _label(1.1, 8.15,"(mine Te)", "#b71c1c", 9)
+
+        _rect(3.0, 8.0, 5.4, 8.9, "#ffe082", "#e65100")
+        _label(4.2, 8.5, "<b>Manufacture</b>", "#e65100", 11)
+        _label(4.2, 8.15,"PV panels", "#e65100", 9)
+
+        _rect(6.3, 8.0, 8.3, 8.9, "#a5d6a7", "#2e7d32")
+        _label(7.3, 8.5, "<b>In Use</b>", "#2e7d32", 11)
+        _label(7.3, 8.15,"25 years", "#2e7d32", 9)
+
+        _rect(8.7, 8.0, 9.9, 8.9, "#b0bec5", "#546e7a")
+        _label(9.3, 8.5, "<b>🗑</b>", "#c62828", 13)
+        _label(9.3, 8.15,"landfill", "#546e7a", 9)
+
+        # Linear arrows (simple horizontal)
+        for x0,x1 in [(2.1,3.0),(5.4,6.3),(8.3,8.7)]:
+            _arrow(x0, 8.45, x1, 8.45, "#888")
+
+        # Divider
+        _fig_ce.add_shape(type="line", x0=0, y0=7.55, x1=10, y1=7.55,
+                          line=dict(color="#ccc", width=1, dash="dot"))
+
+        # ── Section label: CIRCULAR ───────────────────────────────────────────
+        _label(5, 7.2, "<b>CIRCULAR — keep materials in use</b>", "#1565c0", 12)
+
+        # Circular nodes (hexagon layout): top=Mine, right=Manufacture, right-low=In Use,
+        # bottom=End of Life, left-low=Collect & Recycle, left=Recovered Material
+        # Laid out as a two-row grid for clarity
+        # Row 1 (y≈5.8): Mine | Manufacture | In Use
+        # Row 2 (y≈3.5): Recovered | Collect | End of Life
+        _cx = [1.2, 5.0, 8.8,   8.8, 5.0, 1.2]
+        _cy = [5.8, 5.8, 5.8,   3.5, 3.5, 3.5]
+        _clabels = ["Mine<br>(less!)", "Manufacture<br>PV Panel", "In Use<br>25+ yrs",
+                    "End of<br>Life", "Collect &<br>Recycle Te", "Recovered<br>Material"]
+        _cfill   = ["#ef9a9a","#ffe082","#a5d6a7","#ce93d8","#80cbc4","#b2dfdb"]
+        _cline   = ["#b71c1c","#e65100","#2e7d32","#7b1fa2","#004d40","#00695c"]
+        _ctxt    = ["#b71c1c","#e65100","#1b5e20","#4a148c","#004d40","#00695c"]
+
+        for cx,cy,cl,cf,cln,ct in zip(_cx,_cy,_clabels,_cfill,_cline,_ctxt):
+            _rect(cx-1.0, cy-0.55, cx+1.0, cy+0.55, cf, cln)
+            lines = cl.split("<br>")
+            offsets = [0.22, -0.18] if len(lines)==2 else [0]
+            for line_txt, off in zip(lines, offsets):
+                _label(cx, cy+off, f"<b>{line_txt}</b>", ct, 10)
+
+        # Circular arrows: row1 left→right, then right col down, row2 right→left, then left col up
+        # (0)Mine→(1)Manufacture, (1)→(2)InUse, (2)→(3)EndOfLife, (3)→(4)Collect, (4)→(5)Recovered, (5)→(1)Manufacture
+        _flow = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,0)]
+        _flow_colors = ["#1565c0","#1565c0","#1565c0","#1565c0","#2e7d32","#2e7d32"]
+        for (s,e),fc in zip(_flow, _flow_colors):
+            sx,sy = _cx[s], _cy[s]
+            ex,ey = _cx[e], _cy[e]
+            # Midpoint routing to avoid overlap with boxes
+            if sy == ey:  # horizontal
+                _arrow(sx+1.0, sy, ex-1.0, ey, fc)
+            elif sx == ex and sy > ey:  # downward right column
+                _arrow(sx, sy-0.55, ex, ey+0.55, fc)
+            elif sx == ex and sy < ey:  # upward left column
+                _arrow(sx, sy+0.55, ex, ey-0.55, fc)
+            else:
+                _arrow(sx, sy, ex, ey, fc)
+
+        # CE loop highlight label
+        _label(5.0, 2.6, "♻️  CE loop reduces need for virgin mining", "#1565c0", 11)
+
         st.plotly_chart(_fig_ce, use_container_width=True)
 
     st.markdown(

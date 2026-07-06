@@ -116,6 +116,7 @@ PAGES = [
     "☀️ Material Demand",
     "📊 Results & Gap",
     "♻️ Circular Economy",
+    "🌍 LCA of CdTe Solar",
 ]
 
 # Session-state-driven navigation so go_to_page() works instantly
@@ -133,7 +134,8 @@ st.sidebar.markdown(
     "3. Set supply parameters<br>"
     "4. Set demand parameters<br>"
     "5. View <b>Results & Gap</b><br>"
-    "6. Explore <b>Circular Economy</b></small>",
+    "6. Explore <b>Circular Economy</b><br>"
+    "7. Study <b>LCA of CdTe Solar</b></small>",
     unsafe_allow_html=True,
 )
 
@@ -1138,5 +1140,399 @@ elif page == "♻️ Circular Economy":
         "available — as shown in the chart above. The three key levers are: "
         "<b>collection rate</b> (policy), <b>recycling efficiency</b> (technology), and "
         "<b>material intensity reduction</b> (R&D).</p>",
+        unsafe_allow_html=True,
+    )
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE: LCA of CdTe Solar
+# Source: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells 294
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "🌍 LCA of CdTe Solar":
+    st.header("Life Cycle Assessment (LCA) of CdTe Solar", divider="grey")
+    info_box(
+        "This page is based on: <b>Hanna & Anctil (2025)</b> — "
+        "<i>Environmental impact of tellurium: From copper mining to thin film solar modules</i>. "
+        "Solar Energy Materials and Solar Cells, 294, 113898."
+    )
+
+    # ── What is LCA ───────────────────────────────────────────────────────────
+    st.subheader("1 — What is Life Cycle Assessment?")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Life Cycle Assessment (LCA) is a method to estimate the <b>total environmental "
+        "footprint</b> of a product — from raw material extraction all the way to end of life. "
+        "For CdTe solar modules, that means tracking the environmental cost of every step: "
+        "mining copper, smelting, electrorefining, processing anode slimes, refining tellurium, "
+        "and finally manufacturing the solar panel.</p>",
+        unsafe_allow_html=True,
+    )
+
+    # 4-phase LCA cards
+    phases = [
+        ("1", "Goal & Scope", "Define what you are studying and where the system boundary is. "
+         "This study covers copper mining → CdTe solar module.",
+         "#e8f5e9", "#2e7d32"),
+        ("2", "Life Cycle Inventory (LCI)", "Collect all material and energy inputs/outputs at "
+         "each stage. Chemicals, electricity, water, waste.",
+         "#e3f2fd", "#1565c0"),
+        ("3", "Impact Assessment (LCIA)", "Convert the inventory into environmental impact scores: "
+         "GWP, water use, freshwater toxicity, abiotic depletion.",
+         "#fff8e1", "#f57f17"),
+        ("4", "Interpretation", "Compare scenarios, identify hotspots, draw conclusions "
+         "for decision-makers and policymakers.",
+         "#fce4ec", "#c62828"),
+    ]
+    cols = st.columns(4)
+    for col, (num, title, desc, bg, tc) in zip(cols, phases):
+        col.markdown(
+            f"<div style='background:{bg};border-radius:8px;padding:14px;min-height:160px;'>"
+            f"<div style='background:{tc};color:white;border-radius:50%;width:26px;height:26px;"
+            f"display:flex;align-items:center;justify-content:center;font-weight:700;"
+            f"font-size:12px;margin-bottom:8px;'>{num}</div>"
+            f"<b style='color:{tc};font-size:13px;'>{title}</b>"
+            f"<p style='font-size:12px;color:#333;margin-top:6px;line-height:1.6;'>{desc}</p>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ── System boundary diagram ───────────────────────────────────────────────
+    st.subheader("2 — System Boundary: 7 Stages from Mine to Module")
+    info_box(
+        "The study tracks the full supply chain. The arrow below shows where environmental "
+        "impact accumulates — <b>copper mining & beneficiation dominates all impact categories</b>, "
+        "followed by anode slime processing."
+    )
+
+    _stages = [
+        ("Cu Mining &\nBeneficiation", "#ef9a9a", "#b71c1c", "LARGEST\ncontributor"),
+        ("Cu Concentrate\nSmelting",    "#ffe082", "#e65100", ""),
+        ("Cu Anode\nElectrorefining",   "#fff9c4", "#f57f17", ""),
+        ("Anode Slime\nProcessing",     "#ce93d8", "#6a1b9a", "2nd largest\ncontributor"),
+        ("Te Refining\n(SG-Te)",        "#a5d6a7", "#2e7d32", ""),
+        ("SG-CdTe\nProduction",         "#80cbc4", "#00695c", ""),
+        ("CdTe Solar\nModule (PV)",     "#b2ebf2", "#006064", "Final\nproduct"),
+    ]
+
+    import plotly.graph_objects as _go_lca
+    _fig_sb = _go_lca.Figure()
+    _fig_sb.update_layout(
+        xaxis=dict(visible=False, range=[0, 15.5]),
+        yaxis=dict(visible=False, range=[0, 3.2]),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        margin=dict(l=5, r=5, t=5, b=5),
+        height=160, showlegend=False,
+    )
+    for i, (label, bg, tc, note) in enumerate(_stages):
+        x0, x1 = i * 2.2, i * 2.2 + 1.9
+        _fig_sb.add_shape(type="rect", x0=x0, y0=0.6, x1=x1, y1=2.4,
+                          fillcolor=bg, line_color=tc, line_width=1.8)
+        for j, ln in enumerate(label.split("\n")):
+            _fig_sb.add_annotation(x=(x0+x1)/2, y=1.8 - j*0.55, text=f"<b>{ln}</b>",
+                                   showarrow=False, font=dict(size=9, color=tc), xref="x", yref="y")
+        if note:
+            for j, ln in enumerate(note.split("\n")):
+                _fig_sb.add_annotation(x=(x0+x1)/2, y=0.38 - j*0.28, text=ln,
+                                       showarrow=False, font=dict(size=8, color=tc), xref="x", yref="y")
+        if i < len(_stages) - 1:
+            _fig_sb.add_trace(_go_lca.Scatter(
+                x=[x1, x1+0.15], y=[1.5, 1.5], mode="lines",
+                line=dict(color="#555", width=1.8), hoverinfo="skip",
+            ))
+            _fig_sb.add_trace(_go_lca.Scatter(
+                x=[x1+0.15], y=[1.5], mode="markers",
+                marker=dict(symbol="arrow", size=10, color="#555", angle=90),
+                hoverinfo="skip",
+            ))
+    st.plotly_chart(_fig_sb, use_container_width=True)
+
+    st.divider()
+
+    # ── Processing method comparison ──────────────────────────────────────────
+    st.subheader("3 — Processing Method: Hydro vs. Hydro-Pyrometallurgy")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Anode slimes can be treated using two main methods. The method chosen "
+        "by the refinery significantly changes the environmental footprint of tellurium. "
+        "Select a method below to see its relative impact.</p>",
+        unsafe_allow_html=True,
+    )
+
+    _method = st.radio(
+        "Select processing method:",
+        ["⚗️ Hydrometallurgy (HM)", "🔥 Hydro-Pyrometallurgy (HPM)"],
+        horizontal=True,
+        key="lca_method",
+    )
+    _is_hm = "Hydro-P" not in _method
+
+    # Relative values: HPM = baseline (1.0), HM is higher by the % from paper
+    # Paper: HM increases GWP by ≥37%, water consumption by 34%, FW toxicity by 51%, ADP by 48%
+    _impact_cats = ["Global Warming\nPotential (GWP)", "Water\nConsumption", "Freshwater\nToxicity", "Abiotic\nDepletion (ADP)"]
+    _hm_increases = [37, 34, 51, 48]  # % higher than HPM
+    _hpm_vals = [100, 100, 100, 100]
+    _hm_vals  = [100 + d for d in _hm_increases]
+    _selected_vals = _hm_vals if _is_hm else _hpm_vals
+    _baseline_vals = _hpm_vals if _is_hm else _hm_vals
+    _bar_colors = ["#c62828" if _is_hm else "#2e7d32"] * 4
+
+    _fig_method = _go_lca.Figure()
+    _fig_method.add_trace(_go_lca.Bar(
+        x=_impact_cats, y=_selected_vals,
+        marker_color=_bar_colors,
+        text=[f"{v}" for v in _selected_vals],
+        textposition="outside",
+        name="Selected method",
+    ))
+    _fig_method.add_trace(_go_lca.Bar(
+        x=_impact_cats, y=_baseline_vals,
+        marker_color=["rgba(150,150,150,0.35)"] * 4,
+        text=[f"{v}" for v in _baseline_vals],
+        textposition="outside",
+        name="Other method",
+    ))
+    _fig_method.update_layout(
+        barmode="group",
+        yaxis=dict(title="Relative impact (HPM baseline = 100)", range=[0, 175]),
+        xaxis=dict(title="Impact category"),
+        legend=dict(orientation="h", y=1.1),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=30, b=10),
+        height=340,
+    )
+    st.plotly_chart(_fig_method, use_container_width=True)
+
+    if _is_hm:
+        st.markdown(
+            "<div style='background:#ffebee;border-left:5px solid #c62828;"
+            "padding:12px 16px;border-radius:6px;font-size:13px;'>"
+            "⚗️ <b>Hydrometallurgy</b> uses more chemicals (HCl, H₂O₂, H₂SO₄, dibutyl carbitol) "
+            "and recovers Te only at the <i>final</i> reduction step — after bearing the environmental "
+            "cost of recovering silver, gold, and selenium first. This leads to "
+            "<b>37–51% higher impacts</b> compared to hydro-pyrometallurgy.</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            "<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
+            "padding:12px 16px;border-radius:6px;font-size:13px;'>"
+            "🔥 <b>Hydro-Pyrometallurgy</b> recovers tellurium early in the process "
+            "(decopperization step), before silver and gold recovery. This means Te "
+            "only bears the footprint of the first stage, not all subsequent steps. "
+            "This is the method used in the <b>US (Rio Tinto/Kennecott) and Canada (Glencore CCR)</b>.</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ── Location comparison ───────────────────────────────────────────────────
+    st.subheader("4 — Location Matters: No Country Wins on Everything")
+    info_box(
+        "The environmental impact of CdTe depends heavily on <b>where</b> copper is mined and "
+        "anode slimes are processed. Sourcing and treating anode slimes in Canada reduces the "
+        "carbon footprint of SG-CdTe by up to <b>64%</b> compared to the worst-case scenario — "
+        "but Canada has the <b>highest freshwater toxicity and abiotic depletion</b> due to its "
+        "high copper ore concentration."
+    )
+
+    _location = st.selectbox(
+        "Select production location:",
+        ["China (CN) — Jiangxi Copper", "Canada (CA) — Glencore CCR",
+         "Japan (JP) — JX Metals Saganoseki", "USA (US) — Rio Tinto Kennecott"],
+        key="lca_location",
+    )
+
+    # Data from paper (Fig. 3, relative to worst-case = 100 for each metric)
+    # Worst case: CN for GWP & FW toxicity & ADP; JP (SC3) for carbon due to transport
+    # Best case: CA for GWP & water scarcity; US for FW toxicity & ADP
+    # Using approximate relative values derived from paper narrative and Fig. 3
+    _loc_data = {
+        "China (CN) — Jiangxi Copper":        {"GWP": 85,  "Water Scarcity": 100, "FW Toxicity": 100, "ADP": 100},
+        "Canada (CA) — Glencore CCR":         {"GWP": 36,  "Water Scarcity": 30,  "FW Toxicity": 95,  "ADP": 95},
+        "Japan (JP) — JX Metals Saganoseki":  {"GWP": 100, "Water Scarcity": 65,  "FW Toxicity": 70,  "ADP": 70},
+        "USA (US) — Rio Tinto Kennecott":     {"GWP": 55,  "Water Scarcity": 55,  "FW Toxicity": 57,  "ADP": 57},
+    }
+    _loc_vals = _loc_data[_location]
+    _loc_cats = list(_loc_vals.keys())
+    _loc_scores = list(_loc_vals.values())
+    _loc_colors = ["#2e7d32" if v <= 50 else "#f57f17" if v <= 75 else "#c62828"
+                   for v in _loc_scores]
+
+    _fig_loc = _go_lca.Figure()
+    _fig_loc.add_trace(_go_lca.Bar(
+        x=_loc_cats, y=_loc_scores,
+        marker_color=_loc_colors,
+        text=[f"{v}" for v in _loc_scores],
+        textposition="outside",
+    ))
+    _fig_loc.add_hline(y=50, line_dash="dot", line_color="#888",
+                       annotation_text="50 — midpoint", annotation_position="right")
+    _fig_loc.update_layout(
+        yaxis=dict(title="Relative impact (worst case = 100)", range=[0, 120]),
+        xaxis=dict(title="Impact category"),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=20, b=10),
+        height=320,
+        showlegend=False,
+    )
+    st.plotly_chart(_fig_loc, use_container_width=True)
+
+    # Per-location insight
+    _loc_insights = {
+        "China (CN) — Jiangxi Copper": (
+            "#ffebee", "#c62828",
+            "🇨🇳 China has the <b>highest water scarcity footprint</b> — despite using less water than Canada, "
+            "China's water scarcity characterization factor (CF) is 10× Canada's and 3× the US. "
+            "It also leads in freshwater toxicity and abiotic depletion."
+        ),
+        "Canada (CA) — Glencore CCR": (
+            "#e8f5e9", "#2e7d32",
+            "🇨🇦 Canada has the <b>lowest carbon footprint and energy demand</b> thanks to its clean electricity grid. "
+            "However, Canada has the <b>highest freshwater toxicity and ADP</b> — driven by its very high "
+            "copper sulfide ore concentration (low copper-to-molybdenum ratio = only 4.36% of mining impacts "
+            "allocated to molybdenum, vs. >20% elsewhere)."
+        ),
+        "Japan (JP) — JX Metals Saganoseki": (
+            "#fff8e1", "#e65100",
+            "🇯🇵 Japan (SC3) has the <b>highest carbon footprint of all scenarios</b> because it imports "
+            "copper concentrate from Chile — ~20,000 km by sea + 174 km by truck. "
+            "Transportation adds significant GWP despite Chile having a cleaner grid."
+        ),
+        "USA (US) — Rio Tinto Kennecott": (
+            "#e3f2fd", "#1565c0",
+            "🇺🇸 The US has the <b>lowest freshwater toxicity and abiotic depletion</b> among all scenarios. "
+            "This is because the US has the lowest copper concentration and highest molybdenum production "
+            "from copper sulfide ores — distributing more environmental burden to molybdenum, less to Te. "
+            "The US also benefits from a relatively low-carbon electricity grid."
+        ),
+    }
+    _bg, _tc, _txt = _loc_insights[_location]
+    st.markdown(
+        f"<div style='background:{_bg};border-left:5px solid {_tc};"
+        f"padding:12px 16px;border-radius:6px;font-size:13px;line-height:1.7;'>{_txt}</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ── Literature underestimation ────────────────────────────────────────────
+    st.subheader("5 — Why Prior Estimates Were Wrong")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Most previous LCA studies used <b>proxy data from electronic scrap processing</b> to model "
+        "anode slime treatment — not actual commercial tellurium recovery processes. "
+        "This led to systematic underestimation of Te's environmental footprint.</p>",
+        unsafe_allow_html=True,
+    )
+
+    _underest = [
+        ("Carbon footprint\n(SG-Te)", 46, "Previous studies underestimate Te carbon footprint by up to 46%"),
+        ("Cumulative\nEnergy Demand", 78, "Cumulative energy demand underestimated by up to 78%"),
+        ("Freshwater\nToxicity (module)", 35, "CdTe module freshwater toxicity underestimated by 35%"),
+        ("Abiotic Depletion\nPotential (module)", 50, "CdTe module ADP underestimated by 50%"),
+    ]
+
+    _fig_ue = _go_lca.Figure()
+    _fig_ue.add_trace(_go_lca.Bar(
+        x=[u[0] for u in _underest],
+        y=[u[1] for u in _underest],
+        marker_color=["#e65100", "#f57f17", "#c62828", "#880e4f"],
+        text=[f"Up to {u[1]}% underestimated" for u in _underest],
+        textposition="outside",
+        customdata=[u[2] for u in _underest],
+        hovertemplate="%{customdata}<extra></extra>",
+    ))
+    _fig_ue.update_layout(
+        yaxis=dict(title="Underestimation (%)", range=[0, 95]),
+        xaxis=dict(title="Impact category"),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=20, b=10),
+        height=320,
+        showlegend=False,
+    )
+    st.plotly_chart(_fig_ue, use_container_width=True)
+
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "Two root causes: (1) ecoinvent allocated mining impacts using <b>global average</b> "
+        "copper-to-molybdenum ratios instead of country-specific ones; "
+        "(2) the ecoinvent inventory <b>excluded key chemicals</b> used in anode slime leaching "
+        "(H₂SO₄, HCl, H₂O₂, dibutyl carbitol, oxalic acid).</p>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ── Real-world scale ───────────────────────────────────────────────────────
+    st.subheader("6 — Putting It in Perspective")
+    st.markdown(
+        "<p style='font-size:14px;'>What does the underestimation actually mean at US scale?</p>",
+        unsafe_allow_html=True,
+    )
+
+    _c1, _c2, _c3 = st.columns(3)
+    _c1.markdown(
+        "<div style='background:#fff8e1;border-radius:8px;padding:16px;text-align:center;'>"
+        "<div style='font-size:32px;'>⚡</div>"
+        "<p style='font-size:13px;color:#e65100;margin:6px 0;'><b>US CdTe PV in 2024</b></p>"
+        "<p style='font-size:22px;font-weight:700;color:#e65100;'>8.82 GW</p>"
+        "<p style='font-size:12px;color:#555;'>CdTe PV installations<br>(21% US market share)</p>"
+        "</div>", unsafe_allow_html=True,
+    )
+    _c2.markdown(
+        "<div style='background:#ffebee;border-radius:8px;padding:16px;text-align:center;'>"
+        "<div style='font-size:32px;'>🏭</div>"
+        "<p style='font-size:13px;color:#c62828;margin:6px 0;'><b>Carbon underestimation</b></p>"
+        "<p style='font-size:22px;font-weight:700;color:#c62828;'>0.11 M tonnes</p>"
+        "<p style='font-size:12px;color:#555;'>equivalent to burning<br>0.11 million tonnes of coal</p>"
+        "</div>", unsafe_allow_html=True,
+    )
+    _c3.markdown(
+        "<div style='background:#fce4ec;border-radius:8px;padding:16px;text-align:center;'>"
+        "<div style='font-size:32px;'>⛏️</div>"
+        "<p style='font-size:13px;color:#880e4f;margin:6px 0;'><b>ADP underestimation</b></p>"
+        "<p style='font-size:22px;font-weight:700;color:#880e4f;'>352 tonnes</p>"
+        "<p style='font-size:12px;color:#555;'>of silver-equivalent<br>resource depletion missed</p>"
+        "</div>", unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ── Key takeaways ─────────────────────────────────────────────────────────
+    st.subheader("7 — Key Takeaways")
+    _takeaways = [
+        ("🌱", "Location matters",
+         "Sourcing and processing anode slimes in Canada or the US reduces carbon footprint and water scarcity — "
+         "supporting reshoring and friendshoring strategies."),
+        ("⚗️", "Method matters",
+         "Hydro-pyrometallurgical processing consistently outperforms hydrometallurgy across all "
+         "four impact categories. The US and Canada both already use this method."),
+        ("📊", "Old data underestimates impact",
+         "Prior LCA studies missed key chemicals and used global-average allocation. "
+         "This underestimates Te's carbon footprint by up to 46% and the module's ADP by 50%."),
+        ("♻️", "Circular Economy reduces the burden",
+         "Recycling retired CdTe panels reduces demand for newly mined Te — directly cutting "
+         "the upstream environmental impacts shown here."),
+    ]
+    for icon, title, desc in _takeaways:
+        st.markdown(
+            f"<div style='display:flex;align-items:flex-start;gap:14px;"
+            f"background:#f1f8e9;border-radius:8px;padding:12px 16px;margin-bottom:8px;'>"
+            f"<div style='font-size:24px;'>{icon}</div>"
+            f"<div><b style='color:#1b5e20;font-size:14px;'>{title}</b>"
+            f"<p style='font-size:13px;color:#333;margin:4px 0 0 0;line-height:1.6;'>{desc}</p>"
+            f"</div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        "<p style='font-size:12px;color:#888;margin-top:16px;'>"
+        "Source: Hanna, F. & Anctil, A. (2025). Environmental impact of tellurium: "
+        "From copper mining to thin film solar modules. "
+        "<i>Solar Energy Materials and Solar Cells</i>, 294, 113898.</p>",
         unsafe_allow_html=True,
     )

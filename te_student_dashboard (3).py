@@ -124,7 +124,7 @@ PAGES = [
     "📊 Results & Gap",
     "♻️ Circular Economy",
     "🌍 LCA of CdTe Solar",
-    "📝 Policy Brief",
+    "🔍 Scenario Analysis",
 ]
 
 # Session-state-driven navigation so go_to_page() works instantly
@@ -144,7 +144,7 @@ st.sidebar.markdown(
     "5. View <b>Results & Gap</b><br>"
     "6. Explore <b>Circular Economy</b><br>"
     "7. Study <b>LCA of CdTe Solar</b><br>"
-    "8. Write your <b>Policy Brief</b></small>",
+    "8. Complete <b>Scenario Analysis</b></small>",
     unsafe_allow_html=True,
 )
 
@@ -1154,15 +1154,9 @@ elif page == "♻️ Circular Economy":
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: LCA of CdTe Solar
-# Source: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells 294
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "🌍 LCA of CdTe Solar":
     st.header("Life Cycle Assessment (LCA) of CdTe Solar", divider="grey")
-    info_box(
-        "This page is based on: <b>Hanna & Anctil (2025)</b> — "
-        "<i>Environmental impact of tellurium: From copper mining to thin film solar modules</i>. "
-        "Solar Energy Materials and Solar Cells, 294, 113898."
-    )
 
     # ── What is LCA ───────────────────────────────────────────────────────────
     st.subheader("1 — What is Life Cycle Assessment?")
@@ -1276,7 +1270,7 @@ elif page == "🌍 LCA of CdTe Solar":
     )
     _is_hm = "Hydro-P" not in _method
 
-    # Relative values: HPM = baseline (1.0), HM is higher by the % from paper
+    # Relative values: HPM = baseline (1.0), HM is higher by the % shown
     # Paper: HM increases GWP by ≥37%, water consumption by 34%, FW toxicity by 51%, ADP by 48%
     _impact_cats = ["Global Warming\nPotential (GWP)", "Water\nConsumption", "Freshwater\nToxicity", "Abiotic\nDepletion (ADP)"]
     _hm_increases = [37, 34, 51, 48]  # % higher than HPM
@@ -1353,10 +1347,7 @@ elif page == "🌍 LCA of CdTe Solar":
         key="lca_location",
     )
 
-    # Data from paper (Fig. 3, relative to worst-case = 100 for each metric)
-    # Worst case: CN for GWP & FW toxicity & ADP; JP (SC3) for carbon due to transport
-    # Best case: CA for GWP & water scarcity; US for FW toxicity & ADP
-    # Using approximate relative values derived from paper narrative and Fig. 3
+    # Relative values by location (worst case = 100 per metric)
     _loc_data = {
         "China (CN) — Jiangxi Copper":        {"GWP": 85,  "Water Scarcity": 100, "FW Toxicity": 100, "ADP": 100},
         "Canada (CA) — Glencore CCR":         {"GWP": 36,  "Water Scarcity": 30,  "FW Toxicity": 95,  "ADP": 95},
@@ -1538,35 +1529,19 @@ elif page == "🌍 LCA of CdTe Solar":
             unsafe_allow_html=True,
         )
 
-    st.markdown(
-        "<p style='font-size:12px;color:#888;margin-top:16px;'>"
-        "Source: Hanna, F. & Anctil, A. (2025). Environmental impact of tellurium: "
-        "From copper mining to thin film solar modules. "
-        "<i>Solar Energy Materials and Solar Cells</i>, 294, 113898.</p>",
-        unsafe_allow_html=True,
-    )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PAGE: Policy Brief
-# Bloom's Taxonomy: Evaluate + Create
+# PAGE: Scenario Analysis
 # ─────────────────────────────────────────────────────────────────────────────
-elif page == "📝 Policy Brief":
-    st.header("Policy Brief — Tellurium Supply Strategy", divider="grey")
+elif page == "🔍 Scenario Analysis":
+    st.header("Scenario Analysis — Tellurium Supply Strategy", divider="grey")
     info_box(
         "You have studied the supply chain, demand projections, supply–demand gap, "
         "circular economy strategies, and LCA impacts of CdTe solar. "
-        "Now <b>synthesize your findings</b> into a short policy brief — "
-        "a real format used by engineers and policymakers to recommend action."
+        "Now <b>synthesize your findings</b> and answer the questions below "
+        "to build a complete supply strategy recommendation."
     )
 
-    # ── Bloom's level banner ──────────────────────────────────────────────────
-    st.markdown(
-        "<div style='display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;'>"
-        "<div style='background:#c62828;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;'>🔴 Evaluate — justify a stand or decision</div>"
-        "<div style='background:#b71c1c;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;'>🔴 Create — produce an original recommendation</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
 
     # ── Auto-pull student's own numbers ──────────────────────────────────────
     st.subheader("Your Scenario Summary")
@@ -1694,7 +1669,7 @@ elif page == "📝 Policy Brief":
     st.subheader("Question 2 — Processing Method")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
-        "The paper shows that hydro-pyrometallurgical processing has a lower environmental footprint "
+        "Research shows that hydro-pyrometallurgical processing has a lower environmental footprint "
         "than hydrometallurgy across all four impact categories. Should all refineries switch to "
         "hydro-pyrometallurgy? What barriers or trade-offs might exist in practice?</p>",
         unsafe_allow_html=True,
@@ -1777,7 +1752,7 @@ elif page == "📝 Policy Brief":
         # Build downloadable text report
         _name  = st.session_state["student_name"] or "Student"
         _sid   = st.session_state["student_id"]   or "—"
-        _report = f"""POLICY BRIEF — TELLURIUM SUPPLY STRATEGY FOR US CdTe SOLAR
+        _report = f"""SCENARIO ANALYSIS — TELLURIUM SUPPLY STRATEGY FOR US CdTe SOLAR
 {'='*62}
 Student : {_name}
 ID      : {_sid}
@@ -1812,11 +1787,10 @@ QUESTION 5 — OVERALL RECOMMENDATION
 
 {'='*62}
 Source: Material Availability Dashboard
-LCA data: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells, 294, 113898
 """
-        _fname = f"PolicyBrief_{_name.replace(' ','_')}_{_sy}_{_ey}.txt"
+        _fname = f"ScenarioAnalysis_{_name.replace(' ','_')}_{_sy}_{_ey}.txt"
         st.download_button(
-            label="⬇️ Download policy brief (.txt)",
+            label="⬇️ Download scenario analysis (.txt)",
             data=_report,
             file_name=_fname,
             mime="text/plain",
@@ -1833,7 +1807,7 @@ LCA data: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells, 294, 11
         )
         _rubric = [
             ("4 — Excellent",   "#e8f5e9", "#2e7d32",
-             "Answer uses specific numbers from the dashboard or paper, "
+             "Answer uses specific numbers from the dashboard, "
              "explicitly addresses trade-offs, and gives a clear justified recommendation."),
             ("3 — Good",        "#f1f8e9", "#388e3c",
              "Answer is correct and references relevant concepts but may lack "
@@ -1857,20 +1831,3 @@ LCA data: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells, 294, 11
                 unsafe_allow_html=True,
             )
 
-    # ── Bloom's reflection ────────────────────────────────────────────────────
-    st.divider()
-    st.markdown(
-        "<div style='background:#f3e5f5;border-left:5px solid #7b1fa2;"
-        "padding:14px 18px;border-radius:8px;'>"
-        "<b style='color:#4a148c;font-size:14px;'>🧠 Bloom's Taxonomy — where you are now</b><br>"
-        "<p style='font-size:13px;color:#333;margin:8px 0 0 0;line-height:1.8;'>"
-        "By completing this brief you have moved through all six levels:<br>"
-        "🔵 <b>Remember</b> — Te facts and key numbers (Welcome, Hitchhiker) &nbsp;|&nbsp; "
-        "🔵 <b>Understand</b> — Hitchhiker concept, supply/demand formulas &nbsp;|&nbsp; "
-        "🟢 <b>Apply</b> — Supply, Demand, Results pages &nbsp;|&nbsp; "
-        "🟢 <b>Analyze</b> — Gap chart, CE trade-offs, LCA comparison &nbsp;|&nbsp; "
-        "🔴 <b>Evaluate</b> — Questions 1–4 (justify a stand) &nbsp;|&nbsp; "
-        "🔴 <b>Create</b> — Question 5 (original recommendation)</p>"
-        "</div>",
-        unsafe_allow_html=True,
-    )

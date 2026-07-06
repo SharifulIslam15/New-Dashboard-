@@ -96,6 +96,13 @@ DEFAULTS = {
     "nonpv_growth": 4.0,
     # Calculated flag
     "calculated": False,
+    # Policy Brief responses
+    "pb_sourcing": "",
+    "pb_method": "",
+    "pb_ce": "",
+    "pb_risk": "",
+    "pb_recommendation": "",
+    "pb_submitted": False,
     # Navigation
     "_current_page": "🏠 Welcome",
 }
@@ -117,6 +124,7 @@ PAGES = [
     "📊 Results & Gap",
     "♻️ Circular Economy",
     "🌍 LCA of CdTe Solar",
+    "📝 Policy Brief",
 ]
 
 # Session-state-driven navigation so go_to_page() works instantly
@@ -135,7 +143,8 @@ st.sidebar.markdown(
     "4. Set demand parameters<br>"
     "5. View <b>Results & Gap</b><br>"
     "6. Explore <b>Circular Economy</b><br>"
-    "7. Study <b>LCA of CdTe Solar</b></small>",
+    "7. Study <b>LCA of CdTe Solar</b><br>"
+    "8. Write your <b>Policy Brief</b></small>",
     unsafe_allow_html=True,
 )
 
@@ -1534,5 +1543,334 @@ elif page == "🌍 LCA of CdTe Solar":
         "Source: Hanna, F. & Anctil, A. (2025). Environmental impact of tellurium: "
         "From copper mining to thin film solar modules. "
         "<i>Solar Energy Materials and Solar Cells</i>, 294, 113898.</p>",
+        unsafe_allow_html=True,
+    )
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE: Policy Brief
+# Bloom's Taxonomy: Evaluate + Create
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "📝 Policy Brief":
+    st.header("Policy Brief — Tellurium Supply Strategy", divider="grey")
+    info_box(
+        "You have studied the supply chain, demand projections, supply–demand gap, "
+        "circular economy strategies, and LCA impacts of CdTe solar. "
+        "Now <b>synthesize your findings</b> into a short policy brief — "
+        "a real format used by engineers and policymakers to recommend action."
+    )
+
+    # ── Bloom's level banner ──────────────────────────────────────────────────
+    st.markdown(
+        "<div style='display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;'>"
+        "<div style='background:#c62828;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;'>🔴 Evaluate — justify a stand or decision</div>"
+        "<div style='background:#b71c1c;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;'>🔴 Create — produce an original recommendation</div>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    # ── Auto-pull student's own numbers ──────────────────────────────────────
+    st.subheader("Your Scenario Summary")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>These numbers come from <b>your inputs</b> "
+        "on the Supply, Demand, Results, and Circular Economy pages. "
+        "If they look wrong, go back and update those pages first.</p>",
+        unsafe_allow_html=True,
+    )
+
+    # Recalculate from session state
+    _sy  = st.session_state["start_year"]
+    _ey  = st.session_state["end_year"]
+    _yrs = list(range(_sy, _ey + 1))
+    _n   = len(_yrs)
+
+    _mine_base = st.session_state["mine_base_production"]
+    _mine_gr   = st.session_state["mine_growth_rate"] / 100
+    _mining    = [_mine_base * (1 + _mine_gr) ** i for i in range(_n)]
+
+    _bp_val    = (st.session_state["bp_copper_anode"] * 1e6
+                  * st.session_state["bp_te_content"] * 1e-6
+                  * st.session_state["bp_yield"] / 100)
+    _byp       = [_bp_val] * _n
+
+    _rec_supply = (st.session_state["rec_retired_pv"] * 1000
+                   * st.session_state["rec_te_intensity"]
+                   * st.session_state["rec_efficiency"] / 100
+                   * st.session_state["rec_collection"] / 100
+                   * st.session_state["rec_rate"] / 100
+                   / 1000)
+    _rec = [_rec_supply] * _n
+
+    _tot_sup = [_mining[i] + _byp[i] + _rec[i] for i in range(_n)]
+
+    _pv_pgr  = st.session_state["pv_production_growth"] / 100
+    _pv_sgr  = st.session_state["pv_share_growth"]
+    _pv_dem  = [
+        st.session_state["pv_production_start"] * (1 + _pv_pgr) ** i
+        * min(st.session_state["pv_market_share_start"] + _pv_sgr * i, 100) / 100
+        * st.session_state["pv_te_intensity"] / 1000
+        for i in range(_n)
+    ]
+    _npv_dem = [
+        st.session_state["nonpv_base"] * (1 + st.session_state["nonpv_growth"] / 100) ** i
+        for i in range(_n)
+    ]
+    _tot_dem = [_pv_dem[i] + _npv_dem[i] for i in range(_n)]
+    _gap     = [_tot_sup[i] - _tot_dem[i] for i in range(_n)]
+
+    _gap_start = _gap[0]
+    _gap_end   = _gap[-1]
+    _gap_trend = "improving" if _gap_end > _gap_start else "worsening"
+    _gap_label = "surplus" if _gap_end >= 0 else "shortage"
+    _gap_color = "#2e7d32" if _gap_end >= 0 else "#c62828"
+
+    # Summary cards
+    _sc1, _sc2, _sc3, _sc4 = st.columns(4)
+    _sc1.metric("Study period", f"{_sy} – {_ey}")
+    _sc2.metric(f"Gap in {_sy}", f"{_gap_start:+,.0f} t")
+    _sc3.metric(f"Gap in {_ey}", f"{_gap_end:+,.0f} t", delta=_gap_trend)
+    _sc4.metric("Recycling supply", f"{_rec_supply:,.1f} t/yr")
+
+    # Mini sparkline chart
+    import plotly.graph_objects as _go_pb
+    _fig_spark = _go_pb.Figure()
+    _fig_spark.add_trace(_go_pb.Scatter(
+        x=_yrs, y=_tot_sup, name="Supply", mode="lines",
+        line=dict(color="#2e7d32", width=2),
+    ))
+    _fig_spark.add_trace(_go_pb.Scatter(
+        x=_yrs, y=_tot_dem, name="Demand", mode="lines",
+        line=dict(color="#c62828", width=2, dash="dash"),
+    ))
+    _fig_spark.add_trace(_go_pb.Scatter(
+        x=_yrs, y=_gap, name="Gap", mode="lines+markers",
+        line=dict(color="#1565c0", width=1.5),
+        marker=dict(size=5),
+    ))
+    _fig_spark.add_hline(y=0, line_color="#888", line_width=1, line_dash="dot")
+    _fig_spark.update_layout(
+        height=220, margin=dict(t=10, b=10, l=0, r=0),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(size=11, color="#1b5e20"),
+        legend=dict(orientation="h", y=1.12),
+        xaxis=dict(tickmode="array", tickvals=_yrs),
+        yaxis=dict(title="Tonnes"),
+    )
+    st.plotly_chart(_fig_spark, use_container_width=True)
+
+    st.divider()
+
+    # ── Brief instructions ────────────────────────────────────────────────────
+    st.markdown(
+        "<div style='background:#1b5e20;padding:16px 22px;border-radius:10px;margin-bottom:16px;'>"
+        "<p style='color:white;font-size:15px;font-weight:700;margin:0 0 6px 0;'>"
+        "📋 Your Task</p>"
+        "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
+        "You are an engineering advisor writing a brief for a decision-maker at the US Department of Energy. "
+        "Based on your analysis across all pages of this dashboard, answer the five questions below. "
+        "Each answer should be <b>2–4 sentences</b>. Use evidence from your numbers and the LCA findings. "
+        "There is no single right answer — you are being assessed on your <b>reasoning and justification</b>."
+        "</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    # ── Five structured questions ─────────────────────────────────────────────
+    st.subheader("Question 1 — Sourcing Strategy")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "Based on the LCA results (location comparison), which country or region should the US "
+        "prioritize for sourcing copper anode slimes to minimize environmental impact? "
+        "Consider the trade-offs — no location wins on every impact category. "
+        "Justify your choice by referencing at least two impact categories.</p>",
+        unsafe_allow_html=True,
+    )
+    pb_sourcing = st.text_area(
+        "Your answer:",
+        value=st.session_state["pb_sourcing"],
+        height=110,
+        placeholder="e.g. I would recommend sourcing from Canada because... however this comes at the cost of...",
+        key="ta_sourcing",
+    )
+
+    st.subheader("Question 2 — Processing Method")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "The paper shows that hydro-pyrometallurgical processing has a lower environmental footprint "
+        "than hydrometallurgy across all four impact categories. Should all refineries switch to "
+        "hydro-pyrometallurgy? What barriers or trade-offs might exist in practice?</p>",
+        unsafe_allow_html=True,
+    )
+    pb_method = st.text_area(
+        "Your answer:",
+        value=st.session_state["pb_method"],
+        height=110,
+        placeholder="e.g. While hydro-pyrometallurgy is clearly preferable from an LCA standpoint, switching would require...",
+        key="ta_method",
+    )
+
+    st.subheader("Question 3 — Circular Economy Strategy")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "Your Results page shows a supply–demand gap of "
+        f"<b>{_gap_end:+,.0f} tonnes in {_ey}</b>. "
+        "Your recycling setting adds <b>{:.1f} tonnes/yr</b>. ".format(_rec_supply) +
+        "Is recycling alone sufficient to close this gap? "
+        "What combination of CE strategies (collection rate, recycling efficiency, "
+        "material intensity reduction) would you recommend, and why?</p>",
+        unsafe_allow_html=True,
+    )
+    pb_ce = st.text_area(
+        "Your answer:",
+        value=st.session_state["pb_ce"],
+        height=110,
+        placeholder="e.g. With my current settings, recycling provides X tonnes/yr which is [sufficient/insufficient] because...",
+        key="ta_ce",
+    )
+
+    st.subheader("Question 4 — Supply Chain Risk")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "Tellurium is a hitchhiker resource — its supply is controlled by copper production, "
+        "not by Te demand. What does this mean for supply chain risk as CdTe solar scales up rapidly? "
+        "Suggest one policy or industry action that could reduce this risk.</p>",
+        unsafe_allow_html=True,
+    )
+    pb_risk = st.text_area(
+        "Your answer:",
+        value=st.session_state["pb_risk"],
+        height=110,
+        placeholder="e.g. Because Te supply cannot be directly increased in response to PV demand, the risk is... One policy response could be...",
+        key="ta_risk",
+    )
+
+    st.subheader("Question 5 — Overall Recommendation")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "Imagine you must write one paragraph for a policymaker who has 60 seconds to read it. "
+        "Summarize your overall recommendation for a sustainable US tellurium supply strategy "
+        "for CdTe solar. Integrate sourcing, processing method, circular economy, and LCA considerations. "
+        "Be specific and decisive — a policymaker needs a clear recommendation, not a list of uncertainties.</p>",
+        unsafe_allow_html=True,
+    )
+    pb_recommendation = st.text_area(
+        "Your recommendation:",
+        value=st.session_state["pb_recommendation"],
+        height=150,
+        placeholder="e.g. To support sustainable growth of US CdTe solar manufacturing, I recommend...",
+        key="ta_recommendation",
+    )
+
+    st.divider()
+
+    # ── Save + generate PDF-ready report ─────────────────────────────────────
+    col_btn1, col_btn2 = st.columns([1, 1])
+    with col_btn1:
+        if st.button("💾 Save answers"):
+            st.session_state["pb_sourcing"]       = pb_sourcing
+            st.session_state["pb_method"]         = pb_method
+            st.session_state["pb_ce"]             = pb_ce
+            st.session_state["pb_risk"]           = pb_risk
+            st.session_state["pb_recommendation"] = pb_recommendation
+            st.session_state["pb_submitted"]      = True
+            st.success("Answers saved!")
+
+    with col_btn2:
+        # Build downloadable text report
+        _name  = st.session_state["student_name"] or "Student"
+        _sid   = st.session_state["student_id"]   or "—"
+        _report = f"""POLICY BRIEF — TELLURIUM SUPPLY STRATEGY FOR US CdTe SOLAR
+{'='*62}
+Student : {_name}
+ID      : {_sid}
+Period  : {_sy} – {_ey}
+Date    : Generated from Material Availability Dashboard
+
+SCENARIO SUMMARY
+{'─'*40}
+Gap in {_sy}  : {_gap_start:+,.1f} tonnes
+Gap in {_ey}  : {_gap_end:+,.1f} tonnes  ({_gap_trend})
+Recycling     : {_rec_supply:,.1f} tonnes/yr
+
+QUESTION 1 — SOURCING STRATEGY
+{'─'*40}
+{pb_sourcing if pb_sourcing.strip() else '[Not answered]'}
+
+QUESTION 2 — PROCESSING METHOD
+{'─'*40}
+{pb_method if pb_method.strip() else '[Not answered]'}
+
+QUESTION 3 — CIRCULAR ECONOMY STRATEGY
+{'─'*40}
+{pb_ce if pb_ce.strip() else '[Not answered]'}
+
+QUESTION 4 — SUPPLY CHAIN RISK
+{'─'*40}
+{pb_risk if pb_risk.strip() else '[Not answered]'}
+
+QUESTION 5 — OVERALL RECOMMENDATION
+{'─'*40}
+{pb_recommendation if pb_recommendation.strip() else '[Not answered]'}
+
+{'='*62}
+Source: Material Availability Dashboard
+LCA data: Hanna & Anctil (2025), Solar Energy Materials and Solar Cells, 294, 113898
+"""
+        _fname = f"PolicyBrief_{_name.replace(' ','_')}_{_sy}_{_ey}.txt"
+        st.download_button(
+            label="⬇️ Download policy brief (.txt)",
+            data=_report,
+            file_name=_fname,
+            mime="text/plain",
+        )
+
+    st.divider()
+
+    # ── Rubric ────────────────────────────────────────────────────────────────
+    with st.expander("📏 View grading rubric"):
+        st.markdown(
+            "<p style='font-size:13px;color:#555;margin-bottom:10px;'>"
+            "Each question is worth 4 points. Total = 20 points.</p>",
+            unsafe_allow_html=True,
+        )
+        _rubric = [
+            ("4 — Excellent",   "#e8f5e9", "#2e7d32",
+             "Answer uses specific numbers from the dashboard or paper, "
+             "explicitly addresses trade-offs, and gives a clear justified recommendation."),
+            ("3 — Good",        "#f1f8e9", "#388e3c",
+             "Answer is correct and references relevant concepts but may lack "
+             "specific numbers or miss one trade-off."),
+            ("2 — Developing",  "#fff8e1", "#f57f17",
+             "Answer is partially correct or overly general. "
+             "Concepts are identified but not connected to evidence."),
+            ("1 — Beginning",   "#ffebee", "#c62828",
+             "Answer is vague, incorrect, or simply restates the question "
+             "without analysis or justification."),
+            ("0 — Not answered","#f5f5f5", "#888",
+             "No response provided."),
+        ]
+        for score, bg, tc, desc in _rubric:
+            st.markdown(
+                f"<div style='background:{bg};border-left:4px solid {tc};"
+                f"padding:8px 14px;border-radius:6px;margin-bottom:6px;'>"
+                f"<b style='color:{tc};font-size:13px;'>{score}</b>"
+                f"<p style='font-size:12px;color:#333;margin:4px 0 0 0;'>{desc}</p>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+    # ── Bloom's reflection ────────────────────────────────────────────────────
+    st.divider()
+    st.markdown(
+        "<div style='background:#f3e5f5;border-left:5px solid #7b1fa2;"
+        "padding:14px 18px;border-radius:8px;'>"
+        "<b style='color:#4a148c;font-size:14px;'>🧠 Bloom's Taxonomy — where you are now</b><br>"
+        "<p style='font-size:13px;color:#333;margin:8px 0 0 0;line-height:1.8;'>"
+        "By completing this brief you have moved through all six levels:<br>"
+        "🔵 <b>Remember</b> — Te facts and key numbers (Welcome, Hitchhiker) &nbsp;|&nbsp; "
+        "🔵 <b>Understand</b> — Hitchhiker concept, supply/demand formulas &nbsp;|&nbsp; "
+        "🟢 <b>Apply</b> — Supply, Demand, Results pages &nbsp;|&nbsp; "
+        "🟢 <b>Analyze</b> — Gap chart, CE trade-offs, LCA comparison &nbsp;|&nbsp; "
+        "🔴 <b>Evaluate</b> — Questions 1–4 (justify a stand) &nbsp;|&nbsp; "
+        "🔴 <b>Create</b> — Question 5 (original recommendation)</p>"
+        "</div>",
         unsafe_allow_html=True,
     )

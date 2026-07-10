@@ -799,8 +799,11 @@ elif page == "📊 Results & Gap":
     rec_rate = st.session_state["rec_rate"] / 100
     rec_val  = rec_ret * rec_ti * rec_eff * rec_col * rec_rate  # kg → need /1000 for tonnes
     # rec_ti is kg/MWp, rec_ret is GWp → GWp * kg/MWp = GWp * 1000 MWp/GWp * kg/MWp = 1000 * rec_ti * rec_ret kg
-    rec_val_t = rec_ret * 1000 * rec_ti * rec_eff * rec_col * rec_rate / 1000  # convert kg to tonnes
-    recycling = [rec_val_t] * n_yrs
+    rec_gr_r  = st.session_state.get("rec_retired_growth", 5.0) / 100
+    recycling = [
+        rec_ret * (1 + rec_gr_r)**i * 1000 * rec_ti * rec_eff * rec_col * rec_rate / 1000
+        for i in range(n_yrs)
+    ]
 
     total_supply = [mining[i] + byproduct[i] + recycling[i] for i in range(n_yrs)]
 
@@ -1005,24 +1008,31 @@ elif page == "♻️ Circular Economy":
     st.divider()
     st.subheader("Recycling Calculator")
     formula_box(
-        "Recycled Te from retired panels",
-        "Te_rec = Retired_PV (GWp) × 1000 × Te_Intensity (kg/MWp) × Rec_Eff × Collection_Rate × Recycle_Rate / 1000",
-        "10 GWp × 1000 × 67 kg/MWp × 0.90 × 0.85 × 1.00 / 1000 = 512.6 t",
+        "Recycled Te from retired panels (year n)",
+        "Te_rec(n) = Base_Retired × (1 + Growth/100)^n × 1000 × Te_Intensity × Eff × Collection × Rate / 1000",
+        "10 GWp × (1.05)^1 × 1000 × 67 × 0.90 × 0.85 × 1.00 / 1000 = 538.2 t in year 1",
     )
 
     col1, col2 = st.columns(2)
     with col1:
         rec_ret = st.slider(
-            "Retired PV capacity (GWp/yr)",
+            "Retired PV — base year (GWp/yr)",
             min_value=0.0, max_value=500.0, step=5.0,
             value=float(st.session_state["rec_retired_pv"]),
-            help="How many GWp of old CdTe panels are decommissioned each year and available for recycling.",
+            help="GWp of old CdTe panels decommissioned in the start year. Grows at the rate below.",
+        )
+        rec_ret_gr = st.slider(
+            "Retired PV annual growth rate (%/yr)",
+            min_value=0.0, max_value=30.0, step=1.0,
+            value=float(st.session_state.get("rec_retired_growth", 5.0)),
+            help="As more panels installed today reach end-of-life, the volume of retired panels "
+                 "grows each year. Set to 0 for a constant retirement rate.",
         )
         rec_ti = st.slider(
             "Te intensity in panels (kg/MWp)",
             min_value=10.0, max_value=100.0, step=1.0,
             value=float(st.session_state["rec_te_intensity"]),
-            help="Amount of Tellurium per MWp in the panels being retired. Lecture default = 67 kg/MWp.",
+            help="Amount of Tellurium per MWp in the panels being retired. Default = 67 kg/MWp.",
         )
         rec_eff = st.slider(
             "Recycling efficiency (%)",
@@ -1035,7 +1045,7 @@ elif page == "♻️ Circular Economy":
             "Module collection rate (%)",
             min_value=10.0, max_value=100.0, step=5.0,
             value=float(st.session_state["rec_collection"]),
-            help="What fraction of retired panels are actually collected for recycling (vs going to landfill). "
+            help="Fraction of retired panels actually collected for recycling vs landfill. "
                  "This is the key policy lever.",
         )
         rec_rate = st.slider(
@@ -1045,13 +1055,30 @@ elif page == "♻️ Circular Economy":
             help="Of the panels collected, what % actually go through the recycling process.",
         )
 
-    # Live recycling calculation
-    rec_supply = rec_ret * 1000 * rec_ti * (rec_eff / 100) * (rec_col / 100) * (rec_rate / 100) / 1000
+    # Year-by-year recycling
+    _sy_ce = st.session_state["start_year"]
+    _ey_ce = st.session_state["end_year"]
+    _n_ce  = _ey_ce - _sy_ce + 1
+    rec_by_year = [
+        rec_ret * (1 + rec_ret_gr/100)**i * 1000
+        * rec_ti * (rec_eff/100) * (rec_col/100) * (rec_rate/100) / 1000
+        for i in range(_n_ce)
+    ]
+    rec_supply = rec_by_year[0]
+
+    import pandas as _pd_ce
+    _rec_df = _pd_ce.DataFrame({
+        "Year": list(range(_sy_ce, _ey_ce + 1)),
+        "Retired PV (GWp)": [round(rec_ret*(1+rec_ret_gr/100)**i, 1) for i in range(_n_ce)],
+        "Recycled Te (t)":  [round(v, 1) for v in rec_by_year],
+    })
+    st.dataframe(_rec_df.set_index("Year"), use_container_width=True)
 
     st.markdown(
         f"<div style='background:#e8f5e9;border:2px solid #2e7d32;border-radius:8px;"
         f"padding:14px 18px;margin:12px 0;font-size:15px;text-align:center;'>"
-        f"♻️ <b>Recycled Te supply: {rec_supply:,.1f} tonnes/yr</b></div>",
+        f"♻️ <b>Recycled Te: {rec_supply:,.1f} t in {_sy_ce} → "
+        f"{rec_by_year[-1]:,.1f} t in {_ey_ce}</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -1060,12 +1087,13 @@ elif page == "♻️ Circular Economy":
     st.subheader("Impact on the Supply–Demand Gap")
 
     if st.button("💾 Apply recycling to Results page →"):
-        st.session_state["rec_retired_pv"]  = rec_ret
-        st.session_state["rec_te_intensity"] = rec_ti
-        st.session_state["rec_efficiency"]   = rec_eff
-        st.session_state["rec_collection"]   = rec_col
-        st.session_state["rec_rate"]         = rec_rate
-        st.session_state["calculated"]       = False
+        st.session_state["rec_retired_pv"]     = rec_ret
+        st.session_state["rec_retired_growth"] = rec_ret_gr
+        st.session_state["rec_te_intensity"]   = rec_ti
+        st.session_state["rec_efficiency"]     = rec_eff
+        st.session_state["rec_collection"]     = rec_col
+        st.session_state["rec_rate"]           = rec_rate
+        st.session_state["calculated"]         = False
         go_to_page("📊 Results & Gap")
 
     # Quick comparison: with vs without recycling
@@ -1094,8 +1122,17 @@ elif page == "♻️ Circular Economy":
     npv_dem  = [npv_base * (1 + npv_gr)**i for i in range(n_yrs)]
     total_dem = [pv_dem[i] + npv_dem[i] for i in range(n_yrs)]
 
-    gap_no_rec = [mining[i] + byproduct[i] - total_dem[i] for i in range(n_yrs)]
-    gap_with_rec = [mining[i] + byproduct[i] + rec_supply - total_dem[i] for i in range(n_yrs)]
+    _rec_gr_ce = st.session_state.get("rec_retired_growth", 5.0) / 100
+    rec_yearly_ce = [
+        st.session_state["rec_retired_pv"] * (1 + _rec_gr_ce)**i * 1000
+        * st.session_state["rec_te_intensity"]
+        * st.session_state["rec_efficiency"] / 100
+        * st.session_state["rec_collection"] / 100
+        * st.session_state["rec_rate"] / 100 / 1000
+        for i in range(n_yrs)
+    ]
+    gap_no_rec   = [mining[i] + byproduct[i] - total_dem[i] for i in range(n_yrs)]
+    gap_with_rec = [mining[i] + byproduct[i] + rec_yearly_ce[i] - total_dem[i] for i in range(n_yrs)]
 
     fig_ce = go.Figure()
     fig_ce.add_trace(go.Scatter(
@@ -1125,8 +1162,9 @@ elif page == "♻️ Circular Economy":
     diff = rec_supply * n_yrs
     st.markdown(
         f"<p style='font-size:13px;color:#555;'>"
-        f"With these recycling settings, recycling adds <b>{rec_supply:,.1f} t/yr</b> of Te supply, "
-        f"improving the gap by <b>{rec_supply:,.1f} t</b> each year.</p>",
+        f"With these settings, recycling grows from <b>{rec_by_year[0]:,.1f} t</b> "
+        f"in year 1 to <b>{rec_by_year[-1]:,.1f} t</b> by {_ey_ce}, "
+        f"improving the supply–demand gap each year.</p>",
         unsafe_allow_html=True,
     )
 
@@ -1162,41 +1200,15 @@ elif page == "🌍 LCA of CdTe Solar":
     st.subheader("1 — What is Life Cycle Assessment?")
     st.markdown(
         "<p style='font-size:14px;line-height:1.8;'>"
-        "Life Cycle Assessment (LCA) is a method to estimate the <b>total environmental "
-        "footprint</b> of a product — from raw material extraction all the way to end of life. "
-        "For CdTe solar modules, that means tracking the environmental cost of every step: "
-        "mining copper, smelting, electrorefining, processing anode slimes, refining tellurium, "
-        "and finally manufacturing the solar panel.</p>",
+        "Life Cycle Assessment (LCA) estimates the <b>total environmental footprint</b> "
+        "of a product from raw material extraction to end of life. "
+        "For CdTe solar modules, that means tracking the impact of every step: "
+        "copper mining, smelting, electrorefining, anode slime processing, "
+        "Te refining, and panel manufacturing. "
+        "The key metric we focus on here is <b>Global Warming Potential (GWP)</b> — "
+        "measured in kg CO₂-equivalent per functional unit.</p>",
         unsafe_allow_html=True,
     )
-
-    # 4-phase LCA cards
-    phases = [
-        ("1", "Goal & Scope", "Define what you are studying and where the system boundary is. "
-         "This study covers copper mining → CdTe solar module.",
-         "#e8f5e9", "#2e7d32"),
-        ("2", "Life Cycle Inventory (LCI)", "Collect all material and energy inputs/outputs at "
-         "each stage. Chemicals, electricity, water, waste.",
-         "#e3f2fd", "#1565c0"),
-        ("3", "Impact Assessment (LCIA)", "Convert the inventory into environmental impact scores: "
-         "GWP, water use, freshwater toxicity, abiotic depletion.",
-         "#fff8e1", "#f57f17"),
-        ("4", "Interpretation", "Compare scenarios, identify hotspots, draw conclusions "
-         "for decision-makers and policymakers.",
-         "#fce4ec", "#c62828"),
-    ]
-    cols = st.columns(4)
-    for col, (num, title, desc, bg, tc) in zip(cols, phases):
-        col.markdown(
-            f"<div style='background:{bg};border-radius:8px;padding:14px;min-height:160px;'>"
-            f"<div style='background:{tc};color:white;border-radius:50%;width:26px;height:26px;"
-            f"display:flex;align-items:center;justify-content:center;font-weight:700;"
-            f"font-size:12px;margin-bottom:8px;'>{num}</div>"
-            f"<b style='color:{tc};font-size:13px;'>{title}</b>"
-            f"<p style='font-size:12px;color:#333;margin-top:6px;line-height:1.6;'>{desc}</p>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
 
     st.divider()
 
@@ -1418,92 +1430,132 @@ elif page == "🌍 LCA of CdTe Solar":
 
     st.divider()
 
-    # ── Literature underestimation ────────────────────────────────────────────
-    st.subheader("5 — Why Prior Estimates Were Wrong")
+    # ── CO2 Calculator linked to student gap ──────────────────────────────────
+    st.subheader("5 — Carbon Footprint of Your Te Supply Gap")
+    info_box(
+        "Your <b>Results & Gap</b> page calculated a supply–demand gap in tonnes of Tellurium. "
+        "Here we translate that into a carbon footprint using the GWP of Te production — "
+        "so you can see the real-world climate cost of supplying (or failing to supply) Te."
+    )
+
+    # Pull student gap from session state
+    _co2_sy   = st.session_state["start_year"]
+    _co2_ey   = st.session_state["end_year"]
+    _co2_n    = _co2_ey - _co2_sy + 1
+    _co2_mine = [st.session_state["mine_base_production"] * (1 + st.session_state["mine_growth_rate"]/100)**i
+                 for i in range(_co2_n)]
+    _co2_bp   = (st.session_state["bp_copper_anode"] * 1e6
+                 * st.session_state["bp_te_content"] * 1e-6
+                 * st.session_state["bp_yield"] / 100)
+    _co2_rec_gr = st.session_state.get("rec_retired_growth", 5.0) / 100
+    _co2_rec  = [st.session_state["rec_retired_pv"] * (1 + _co2_rec_gr)**i * 1000
+                 * st.session_state["rec_te_intensity"]
+                 * st.session_state["rec_efficiency"] / 100
+                 * st.session_state["rec_collection"] / 100
+                 * st.session_state["rec_rate"] / 100 / 1000
+                 for i in range(_co2_n)]
+    _co2_sup  = [_co2_mine[i] + _co2_bp + _co2_rec[i] for i in range(_co2_n)]
+    _co2_pv   = [st.session_state["pv_production_start"] * (1 + st.session_state["pv_production_growth"]/100)**i
+                 * min(st.session_state["pv_market_share_start"] + st.session_state["pv_share_growth"]*i, 100)/100
+                 * st.session_state["pv_te_intensity"] / 1000
+                 for i in range(_co2_n)]
+    _co2_npv  = [st.session_state["nonpv_base"] * (1 + st.session_state["nonpv_growth"]/100)**i
+                 for i in range(_co2_n)]
+    _co2_dem  = [_co2_pv[i] + _co2_npv[i] for i in range(_co2_n)]
+    _co2_gap  = [_co2_sup[i] - _co2_dem[i] for i in range(_co2_n)]
+
+    # GWP per kg Te by location and method (kg CO2-eq per kg Te)
+    # Values derived from LCA literature for SG-grade Te
+    # HPM: CA~5, US~12, JP~25, CN~22 kg CO2/kg Te (approximate from Fig.3 scale)
+    # HM is ~37% higher
     st.markdown(
-        "<p style='font-size:14px;line-height:1.8;'>"
-        "Most previous LCA studies used <b>proxy data from electronic scrap processing</b> to model "
-        "anode slime treatment — not actual commercial tellurium recovery processes. "
-        "This led to systematic underestimation of Te's environmental footprint.</p>",
+        "<p style='font-size:13px;color:#555;margin-bottom:8px;'>"
+        "Select the sourcing location and processing method to see the carbon intensity "
+        "of Te production — then see how your gap translates into kg CO₂.</p>",
         unsafe_allow_html=True,
     )
 
-    _underest = [
-        ("Carbon footprint\n(SG-Te)", 46, "Previous studies underestimate Te carbon footprint by up to 46%"),
-        ("Cumulative\nEnergy Demand", 78, "Cumulative energy demand underestimated by up to 78%"),
-        ("Freshwater\nToxicity (module)", 35, "CdTe module freshwater toxicity underestimated by 35%"),
-        ("Abiotic Depletion\nPotential (module)", 50, "CdTe module ADP underestimated by 50%"),
-    ]
+    _co2_col1, _co2_col2 = st.columns(2)
+    with _co2_col1:
+        _co2_loc = st.selectbox(
+            "Production location",
+            ["Canada (CA)", "USA (US)", "Japan (JP)", "China (CN)"],
+            key="co2_loc",
+        )
+    with _co2_col2:
+        _co2_method = st.radio(
+            "Processing method",
+            ["Hydro-Pyrometallurgy (HPM)", "Hydrometallurgy (HM)"],
+            horizontal=True,
+            key="co2_method",
+        )
 
-    _fig_ue = _go_lca.Figure()
-    _fig_ue.add_trace(_go_lca.Bar(
-        x=[u[0] for u in _underest],
-        y=[u[1] for u in _underest],
-        marker_color=["#e65100", "#f57f17", "#c62828", "#880e4f"],
-        text=[f"Up to {u[1]}% underestimated" for u in _underest],
+    # GWP intensity (kg CO2-eq per kg Te) — HPM baseline, HM is 37% higher
+    _gwp_hpm = {"Canada (CA)": 5.0, "USA (US)": 12.0, "Japan (JP)": 25.0, "China (CN)": 22.0}
+    _gwp_base = _gwp_hpm[_co2_loc]
+    _gwp_te   = _gwp_base * 1.37 if "HM" in _co2_method and "HPM" not in _co2_method else _gwp_base
+
+    # Total Te supplied over study period × GWP intensity = total carbon footprint
+    _co2_total_supply_t = sum(_co2_sup)   # tonnes
+    _co2_kg_co2 = _co2_total_supply_t * 1000 * _gwp_te  # tonnes Te → kg Te → kg CO2
+    _co2_gap_end = _co2_gap[-1]
+    _co2_gap_impact = abs(_co2_gap_end) * 1000 * _gwp_te  # kg CO2 for the gap
+
+    _co2_m1, _co2_m2, _co2_m3 = st.columns(3)
+    _co2_m1.metric(
+        "Te GWP intensity",
+        f"{_gwp_te:.1f} kg CO₂/kg Te",
+        help="Carbon footprint per kg of semiconductor-grade Te produced",
+    )
+    _co2_m2.metric(
+        f"Total CO₂ from Te supply ({_co2_sy}–{_co2_ey})",
+        f"{_co2_kg_co2/1e6:.2f} Mt CO₂",
+        help="Cumulative carbon footprint of all Te supplied over your study period",
+    )
+    _co2_m3.metric(
+        f"CO₂ impact of gap in {_co2_ey}",
+        f"{_co2_gap_impact/1e3:,.0f} t CO₂",
+        delta="surplus saves this CO₂" if _co2_gap_end >= 0 else "shortage needs this CO₂",
+        help="Carbon cost of the supply–demand gap in the final year",
+    )
+
+    # Year-by-year CO2 chart
+    _co2_yearly = [s * 1000 * _gwp_te / 1e6 for s in _co2_sup]  # Mt CO2 per year
+    _fig_co2 = _go_lca.Figure()
+    _fig_co2.add_trace(_go_lca.Bar(
+        x=list(range(_co2_sy, _co2_ey + 1)),
+        y=_co2_yearly,
+        name="CO₂ from Te supply",
+        marker_color="#c62828",
+        text=[f"{v:.3f}" for v in _co2_yearly],
         textposition="outside",
-        customdata=[u[2] for u in _underest],
-        hovertemplate="%{customdata}<extra></extra>",
     ))
-    _fig_ue.update_layout(
-        yaxis=dict(title="Underestimation (%)", range=[0, 95]),
-        xaxis=dict(title="Impact category"),
+    _fig_co2.update_layout(
+        xaxis=dict(title="Year", tickmode="array",
+                   tickvals=list(range(_co2_sy, _co2_ey + 1))),
+        yaxis=dict(title="Mt CO₂-eq per year"),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
         font=dict(color="#1b5e20"),
-        margin=dict(t=20, b=10),
-        height=320,
-        showlegend=False,
+        margin=dict(t=20, b=10), height=280, showlegend=False,
     )
-    st.plotly_chart(_fig_ue, use_container_width=True)
+    st.plotly_chart(_fig_co2, use_container_width=True)
 
     st.markdown(
-        "<p style='font-size:13px;color:#555;'>"
-        "Two root causes: (1) ecoinvent allocated mining impacts using <b>global average</b> "
-        "copper-to-molybdenum ratios instead of country-specific ones; "
-        "(2) the ecoinvent inventory <b>excluded key chemicals</b> used in anode slime leaching "
-        "(H₂SO₄, HCl, H₂O₂, dibutyl carbitol, oxalic acid).</p>",
+        f"<div style='background:#f1f8e9;border-left:4px solid #2e7d32;padding:10px 14px;"
+        f"border-radius:6px;font-size:13px;'>"
+        f"💡 <b>Connection to your supply gap:</b> Your scenario shows a gap of "
+        f"<b>{_co2_gap_end:+,.0f} t</b> in {_co2_ey}. "
+        f"At {_gwp_te:.1f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
+        f"sourcing that Te would produce "
+        f"<b>{_co2_gap_impact/1e3:,.0f} additional tonnes of CO₂</b>. "
+        f"Switching to a lower-GWP location or method directly reduces this burden.</div>",
         unsafe_allow_html=True,
-    )
-
-    st.divider()
-
-    # ── Real-world scale ───────────────────────────────────────────────────────
-    st.subheader("6 — Putting It in Perspective")
-    st.markdown(
-        "<p style='font-size:14px;'>What does the underestimation actually mean at US scale?</p>",
-        unsafe_allow_html=True,
-    )
-
-    _c1, _c2, _c3 = st.columns(3)
-    _c1.markdown(
-        "<div style='background:#fff8e1;border-radius:8px;padding:16px;text-align:center;'>"
-        "<div style='font-size:32px;'>⚡</div>"
-        "<p style='font-size:13px;color:#e65100;margin:6px 0;'><b>US CdTe PV in 2024</b></p>"
-        "<p style='font-size:22px;font-weight:700;color:#e65100;'>8.82 GW</p>"
-        "<p style='font-size:12px;color:#555;'>CdTe PV installations<br>(21% US market share)</p>"
-        "</div>", unsafe_allow_html=True,
-    )
-    _c2.markdown(
-        "<div style='background:#ffebee;border-radius:8px;padding:16px;text-align:center;'>"
-        "<div style='font-size:32px;'>🏭</div>"
-        "<p style='font-size:13px;color:#c62828;margin:6px 0;'><b>Carbon underestimation</b></p>"
-        "<p style='font-size:22px;font-weight:700;color:#c62828;'>0.11 M tonnes</p>"
-        "<p style='font-size:12px;color:#555;'>equivalent to burning<br>0.11 million tonnes of coal</p>"
-        "</div>", unsafe_allow_html=True,
-    )
-    _c3.markdown(
-        "<div style='background:#fce4ec;border-radius:8px;padding:16px;text-align:center;'>"
-        "<div style='font-size:32px;'>⛏️</div>"
-        "<p style='font-size:13px;color:#880e4f;margin:6px 0;'><b>ADP underestimation</b></p>"
-        "<p style='font-size:22px;font-weight:700;color:#880e4f;'>352 tonnes</p>"
-        "<p style='font-size:12px;color:#555;'>of silver-equivalent<br>resource depletion missed</p>"
-        "</div>", unsafe_allow_html=True,
     )
 
     st.divider()
 
     # ── Key takeaways ─────────────────────────────────────────────────────────
-    st.subheader("7 — Key Takeaways")
+    st.subheader("6 — Key Takeaways")
     _takeaways = [
         ("🌱", "Location matters",
          "Sourcing and processing anode slimes in Canada or the US reduces carbon footprint and water scarcity — "
@@ -1511,9 +1563,9 @@ elif page == "🌍 LCA of CdTe Solar":
         ("⚗️", "Method matters",
          "Hydro-pyrometallurgical processing consistently outperforms hydrometallurgy across all "
          "four impact categories. The US and Canada both already use this method."),
-        ("📊", "Old data underestimates impact",
-         "Prior LCA studies missed key chemicals and used global-average allocation. "
-         "This underestimates Te's carbon footprint by up to 46% and the module's ADP by 50%."),
+        ("📊", "Carbon footprint depends on where and how Te is produced",
+         "The GWP of Te ranges from ~5 kg CO₂/kg (Canada, HPM) to ~34 kg CO₂/kg (Japan, HM). "
+         "Your sourcing choice has a direct, calculable impact on total CO₂ emissions."),
         ("♻️", "Circular Economy reduces the burden",
          "Recycling retired CdTe panels reduces demand for newly mined Te — directly cutting "
          "the upstream environmental impacts shown here."),
@@ -1567,13 +1619,16 @@ elif page == "🔍 Scenario Analysis":
                   * st.session_state["bp_yield"] / 100)
     _byp       = [_bp_val] * _n
 
-    _rec_supply = (st.session_state["rec_retired_pv"] * 1000
-                   * st.session_state["rec_te_intensity"]
-                   * st.session_state["rec_efficiency"] / 100
-                   * st.session_state["rec_collection"] / 100
-                   * st.session_state["rec_rate"] / 100
-                   / 1000)
-    _rec = [_rec_supply] * _n
+    _rec_gr_sa = st.session_state.get("rec_retired_growth", 5.0) / 100
+    _rec = [
+        st.session_state["rec_retired_pv"] * (1 + _rec_gr_sa)**i * 1000
+        * st.session_state["rec_te_intensity"]
+        * st.session_state["rec_efficiency"] / 100
+        * st.session_state["rec_collection"] / 100
+        * st.session_state["rec_rate"] / 100 / 1000
+        for i in range(_n)
+    ]
+    _rec_supply = _rec[0]
 
     _tot_sup = [_mining[i] + _byp[i] + _rec[i] for i in range(_n)]
 
@@ -1669,7 +1724,7 @@ elif page == "🔍 Scenario Analysis":
     st.subheader("Question 2 — Processing Method")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
-        "Research shows that hydro-pyrometallurgical processing has a lower environmental footprint "
+        "Hydro-pyrometallurgical processing has a lower environmental footprint "
         "than hydrometallurgy across all four impact categories. Should all refineries switch to "
         "hydro-pyrometallurgy? What barriers or trade-offs might exist in practice?</p>",
         unsafe_allow_html=True,

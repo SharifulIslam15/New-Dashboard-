@@ -1514,7 +1514,7 @@ elif page == "🌍 LCA of CdTe Solar":
     )
     _co2_m3.metric(
         f"CO₂ impact of gap in {_co2_ey}",
-        f"{_co2_gap_impact/1e9:.4f} Mt CO₂",
+        f"{_co2_gap_impact/1e3:,.0f} t CO₂",
         delta="surplus saves this CO₂" if _co2_gap_end >= 0 else "shortage needs this CO₂",
         help="Carbon cost of the supply–demand gap in the final year",
     )
@@ -1547,7 +1547,7 @@ elif page == "🌍 LCA of CdTe Solar":
         f"<b>{_co2_gap_end:+,.0f} t</b> in {_co2_ey}. "
         f"At {_gwp_te:.1f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
         f"sourcing that Te would produce "
-        f"<b>{_co2_gap_impact/1e9:.4f} Mt CO₂</b>. "
+        f"<b>{_co2_gap_impact/1e3:,.0f} additional tonnes of CO₂</b>. "
         f"Switching to a lower-GWP location or method directly reduces this burden.</div>",
         unsafe_allow_html=True,
     )

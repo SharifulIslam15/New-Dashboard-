@@ -96,6 +96,10 @@ DEFAULTS = {
     "nonpv_growth": 4.0,
     # Calculated flag
     "calculated": False,
+    # Circularity Reality Check
+    "crc_panel_lifetime": 25,
+    "crc_te_intensity_scenario": "Constant (67 kg/MWp)",
+    "crc_collection_stress": 10.0,
     # Policy Brief responses
     "pb_sourcing": "",
     "pb_method": "",
@@ -123,6 +127,7 @@ PAGES = [
     "☀️ Material Demand",
     "📊 Results & Gap",
     "♻️ Circular Economy",
+    "⚠️ Circularity Reality Check",
     "🌍 LCA of CdTe Solar",
     "🔍 Scenario Analysis",
 ]
@@ -143,8 +148,9 @@ st.sidebar.markdown(
     "4. Set demand parameters<br>"
     "5. View <b>Results & Gap</b><br>"
     "6. Explore <b>Circular Economy</b><br>"
-    "7. Study <b>LCA of CdTe Solar</b><br>"
-    "8. Complete <b>Scenario Analysis</b></small>",
+    "7. Challenge assumptions — <b>Circularity Reality Check</b><br>"
+    "8. Study <b>LCA of CdTe Solar</b><br>"
+    "9. Complete <b>Scenario Analysis</b></small>",
     unsafe_allow_html=True,
 )
 
@@ -1514,7 +1520,7 @@ elif page == "🌍 LCA of CdTe Solar":
     )
     _co2_m3.metric(
         f"CO₂ impact of gap in {_co2_ey}",
-        f"{_co2_gap_impact/1e3:,.0f} t CO₂",
+        f"{_co2_gap_impact/1e9:.4f} Mt CO₂",
         delta="surplus saves this CO₂" if _co2_gap_end >= 0 else "shortage needs this CO₂",
         help="Carbon cost of the supply–demand gap in the final year",
     )
@@ -1547,7 +1553,7 @@ elif page == "🌍 LCA of CdTe Solar":
         f"<b>{_co2_gap_end:+,.0f} t</b> in {_co2_ey}. "
         f"At {_gwp_te:.1f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
         f"sourcing that Te would produce "
-        f"<b>{_co2_gap_impact/1e3:,.0f} additional tonnes of CO₂</b>. "
+        f"<b>{_co2_gap_impact/1e9:.4f} Mt CO₂</b>. "
         f"Switching to a lower-GWP location or method directly reduces this burden.</div>",
         unsafe_allow_html=True,
     )
@@ -1789,6 +1795,24 @@ elif page == "🔍 Scenario Analysis":
         key="ta_recommendation",
     )
 
+    st.subheader("Question 6 — Stress-Testing Your Strategy")
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "On the Circularity Reality Check page you saw how your recycling numbers change "
+        "under three stress conditions: longer panel lifetime, thinner Te layers, and "
+        "low collection rates. Does your circular economy strategy from Question 3 still "
+        "hold under those conditions? If not, what would you change — and what "
+        "trade-offs does that involve?</p>",
+        unsafe_allow_html=True,
+    )
+    pb_stress = st.text_area(
+        "Your answer:",
+        value=st.session_state.get("pb_stress", ""),
+        height=120,
+        placeholder="e.g. Under 40-year panel lifetime, recycled Te does not arrive until 2065, so my CE strategy alone cannot close the 2035 gap. I would therefore also recommend...",
+        key="ta_stress",
+    )
+
     st.divider()
 
     # ── Save + generate PDF-ready report ─────────────────────────────────────
@@ -1800,6 +1824,7 @@ elif page == "🔍 Scenario Analysis":
             st.session_state["pb_ce"]             = pb_ce
             st.session_state["pb_risk"]           = pb_risk
             st.session_state["pb_recommendation"] = pb_recommendation
+            st.session_state["pb_stress"]         = pb_stress
             st.session_state["pb_submitted"]      = True
             st.success("Answers saved!")
 
@@ -1840,6 +1865,10 @@ QUESTION 5 — OVERALL RECOMMENDATION
 {'─'*40}
 {pb_recommendation if pb_recommendation.strip() else '[Not answered]'}
 
+QUESTION 6 — STRESS-TESTING YOUR STRATEGY
+{'─'*40}
+{st.session_state.get('pb_stress','') or '[Not answered]'}
+
 {'='*62}
 Source: Material Availability Dashboard
 """
@@ -1857,7 +1886,7 @@ Source: Material Availability Dashboard
     with st.expander("📏 View grading rubric"):
         st.markdown(
             "<p style='font-size:13px;color:#555;margin-bottom:10px;'>"
-            "Each question is worth 4 points. Total = 20 points.</p>",
+            "Each question is worth 4 points. Total = 24 points.</p>",
             unsafe_allow_html=True,
         )
         _rubric = [
@@ -1886,3 +1915,534 @@ Source: Material Availability Dashboard
                 unsafe_allow_html=True,
             )
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE: Circularity Reality Check
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "⚠️ Circularity Reality Check":
+    st.header("Circularity Reality Check", divider="grey")
+    st.markdown(
+        "<div style='background:#fff3e0;border-left:5px solid #e65100;"
+        "padding:14px 18px;border-radius:8px;margin-bottom:16px;'>"
+        "<b style='color:#bf360c;font-size:15px;'>⚠️ Challenge your assumptions</b><br>"
+        "<p style='color:#333;font-size:14px;line-height:1.8;margin:8px 0 0 0;'>"
+        "On the previous page you calculated how much Te recycling can recover. "
+        "That calculation assumed ideal conditions. "
+        "This page asks: <b>what happens when one assumption changes?</b> "
+        "Real circular economy systems rarely operate under ideal conditions."
+        "</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    import plotly.graph_objects as _go_crc
+    import pandas as _pd_crc
+
+    # ── Pull student's CE settings ─────────────────────────────────────────────
+    _sy   = st.session_state["start_year"]
+    _ey   = st.session_state["end_year"]
+    _yrs  = list(range(_sy, _ey + 1))
+    _n    = len(_yrs)
+
+    _ret_base = st.session_state["rec_retired_pv"]
+    _ret_gr   = st.session_state.get("rec_retired_growth", 5.0) / 100
+    _ti_base  = st.session_state["rec_te_intensity"]
+    _eff      = st.session_state["rec_efficiency"] / 100
+    _col      = st.session_state["rec_collection"] / 100
+    _rate     = st.session_state["rec_rate"] / 100
+
+    def _calc_rec(ret_base, ret_gr, ti, eff, col, rate, n):
+        return [
+            ret_base * (1 + ret_gr)**i * 1000 * ti * eff * col * rate / 1000
+            for i in range(n)
+        ]
+
+    # Base scenario (student's settings)
+    _rec_base = _calc_rec(_ret_base, _ret_gr, _ti_base, _eff, _col, _rate, _n)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 1 — Stress Test Your Numbers
+    # ══════════════════════════════════════════════════════════════════════════
+    st.subheader("1 — Stress Test: What If One Assumption Changes?")
+    info_box(
+        "Your CE page calculated recycled Te under your chosen settings. "
+        "Below, three stress scenarios automatically recalculate that number. "
+        "No new inputs needed — just see what happens."
+    )
+
+    # ── Stress scenario controls ───────────────────────────────────────────────
+    _sc1, _sc2, _sc3 = st.columns(3)
+    with _sc1:
+        _lifetime = st.selectbox(
+            "Panel lifetime",
+            [25, 30, 35, 40],
+            index=0,
+            key="crc_lifetime",
+            help="If panels last longer, the retirement wave arrives later — "
+                 "delaying when recycled Te enters the supply chain.",
+        )
+    with _sc2:
+        _ti_scenario = st.selectbox(
+            "Te intensity trajectory",
+            ["Constant (67 kg/MWp)",
+             "Decreasing 2%/yr (technology improves slowly)",
+             "Decreasing 5%/yr (technology improves fast)"],
+            key="crc_ti_scenario",
+            help="As CdTe efficiency improves, panels use less Te per MWp. "
+                 "Retired panels in 2040 may contain far less Te than panels installed today.",
+        )
+    with _sc3:
+        _col_stress = st.slider(
+            "Collection rate (stress test)",
+            min_value=0.0, max_value=100.0, step=5.0,
+            value=10.0,
+            key="crc_col_stress",
+            help="Current US collection rate is ~10%. "
+                 "Your CE page may have used a higher optimistic rate. "
+                 "Drag this to see how collection rate affects recycled Te.",
+        )
+
+    # ── Compute stressed scenarios ─────────────────────────────────────────────
+    # Scenario 1: Long lifetime — retirement delayed
+    # Shift retirement wave: panels installed now retire in 'lifetime' years
+    # Approximate: scale retired PV by fraction available given lifetime delay
+    _delay_factor = 25.0 / _lifetime  # relative to 25-yr baseline
+    _rec_s1 = _calc_rec(
+        _ret_base * _delay_factor, _ret_gr, _ti_base, _eff, _col, _rate, _n
+    )
+
+    # Scenario 2: Declining Te intensity
+    if "2%" in _ti_scenario:
+        _ti_decline = 0.02
+    elif "5%" in _ti_scenario:
+        _ti_decline = 0.05
+    else:
+        _ti_decline = 0.0
+    _rec_s2 = [
+        _ret_base * (1 + _ret_gr)**i * 1000
+        * (_ti_base * (1 - _ti_decline)**i)
+        * _eff * _col * _rate / 1000
+        for i in range(_n)
+    ]
+
+    # Scenario 3: Low collection rate (stress test slider)
+    _rec_s3 = _calc_rec(
+        _ret_base, _ret_gr, _ti_base, _eff, _col_stress / 100, _rate, _n
+    )
+
+    # ── Chart: 4 scenarios side by side ──────────────────────────────────────
+    _fig_stress = _go_crc.Figure()
+    _colors = ["#2e7d32", "#1565c0", "#e65100", "#c62828"]
+    _labels = [
+        f"Your settings ({_col*100:.0f}% collection, {_lifetime}-yr life, {_ti_base:.0f} kg/MWp)",
+        f"Long lifetime ({_lifetime}-yr → delayed retirement wave)",
+        f"Thin film ({_ti_scenario.split('(')[1].rstrip(')')})",
+        f"Low collection ({_col_stress:.0f}% — current US reality)",
+    ]
+    _scenarios = [_rec_base, _rec_s1, _rec_s2, _rec_s3]
+
+    for label, vals, color in zip(_labels, _scenarios, _colors):
+        _fig_stress.add_trace(_go_crc.Scatter(
+            x=_yrs, y=vals,
+            name=label, mode="lines+markers",
+            line=dict(color=color, width=2),
+            marker=dict(size=5),
+        ))
+
+    _fig_stress.update_layout(
+        xaxis=dict(title="Year", tickmode="array", tickvals=_yrs),
+        yaxis=dict(title="Recycled Te (tonnes/yr)"),
+        legend=dict(orientation="h", y=-0.35, font=dict(size=10)),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=20, b=10),
+        height=360,
+    )
+    st.plotly_chart(_fig_stress, use_container_width=True)
+
+    # ── Summary comparison table ───────────────────────────────────────────────
+    _end_vals = [s[-1] for s in _scenarios]
+    _pct_change = [
+        (v - _rec_base[-1]) / max(_rec_base[-1], 0.001) * 100
+        for v in _end_vals
+    ]
+    _stress_df = _pd_crc.DataFrame({
+        "Scenario": [
+            "Your settings (base)",
+            f"Long lifetime ({_lifetime} yrs)",
+            f"Thin film ({_ti_scenario.split('(')[0].strip()})",
+            f"Low collection ({_col_stress:.0f}%)",
+        ],
+        f"Recycled Te in {_ey} (t)": [round(v, 1) for v in _end_vals],
+        "Change vs. base": [
+            "—",
+            f"{_pct_change[1]:+.0f}%",
+            f"{_pct_change[2]:+.0f}%",
+            f"{_pct_change[3]:+.0f}%",
+        ],
+    })
+    st.dataframe(_stress_df.set_index("Scenario"), use_container_width=True)
+
+    # ── Reflection prompt ──────────────────────────────────────────────────────
+    _worst = min(_end_vals[1], _end_vals[2], _end_vals[3])
+    _best  = _rec_base[-1]
+    st.markdown(
+        f"<div style='background:#fff8e1;border-left:5px solid #f57f17;"
+        f"padding:12px 16px;border-radius:6px;font-size:13px;margin-top:8px;'>"
+        f"💡 <b>Think about this:</b> Your optimistic recycling scenario recovers "
+        f"<b>{_best:,.1f} t/yr</b> by {_ey}. "
+        f"Under the most stressed condition, that drops to <b>{_worst:,.1f} t/yr</b> — "
+        f"a reduction of <b>{(1 - _worst/max(_best,0.001))*100:.0f}%</b>. "
+        f"Does your supply strategy still work at that level?</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 2 — The Timing Mismatch
+    # ══════════════════════════════════════════════════════════════════════════
+    st.subheader("2 — The Timing Problem: When Does Recycled Te Actually Arrive?")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Even if recycling works perfectly, it can only recover Te from panels that have "
+        "already been <b>retired</b>. Panels installed today won't retire for 25–40 years. "
+        "The Te shortage is projected for the <b>2030s</b>. "
+        "That means recycled Te may arrive too late to close the gap when it matters most."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
+    _lt_sel = st.select_slider(
+        "Panel lifetime (years) — drag to see when recycled Te becomes available:",
+        options=[25, 30, 35, 40],
+        value=25,
+        key="crc_timing_lt",
+    )
+
+    # Timeline: install year 2025, retirement = 2025 + lifetime
+    _install_yr   = 2025
+    _retire_yr    = _install_yr + _lt_sel
+    _shortage_yr  = 2035  # projected demand peak / shortage window
+
+    # Build timeline figure
+    _fig_time = _go_crc.Figure()
+    _fig_time.update_layout(
+        xaxis=dict(range=[2022, 2075], title="Year",
+                   tickmode="array",
+                   tickvals=list(range(2025, 2075, 5)),
+                   showgrid=True, gridcolor="#e0e0e0"),
+        yaxis=dict(visible=False, range=[0, 5]),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=30, b=10),
+        height=260,
+        showlegend=True,
+        legend=dict(orientation="h", y=1.12, font=dict(size=11)),
+    )
+
+    # Panel installation bar
+    _fig_time.add_shape(type="rect", x0=2025, y0=2.6, x1=2027, y1=3.4,
+                        fillcolor="#a5d6a7", line_color="#2e7d32", line_width=1.5)
+    _fig_time.add_annotation(x=2026, y=3.0, text="<b>Panels<br>installed</b>",
+                             showarrow=False, font=dict(size=10, color="#2e7d32"),
+                             xref="x", yref="y")
+
+    # In-use bar
+    _fig_time.add_shape(type="rect", x0=2027, y0=2.6, x1=_retire_yr, y1=3.4,
+                        fillcolor="#e8f5e9", line_color="#2e7d32",
+                        line_width=1, line_dash="dot")
+    _mid_use = (2027 + _retire_yr) / 2
+    _fig_time.add_annotation(x=_mid_use, y=3.0,
+                             text=f"In use ({_lt_sel} yrs)",
+                             showarrow=False, font=dict(size=10, color="#555"),
+                             xref="x", yref="y")
+
+    # Recycled Te available bar
+    _fig_time.add_shape(type="rect", x0=_retire_yr, y0=2.6, x1=_retire_yr+10, y1=3.4,
+                        fillcolor="#b2ebf2", line_color="#006064", line_width=1.5)
+    _fig_time.add_annotation(x=_retire_yr+5, y=3.0,
+                             text="<b>Recycled Te<br>available</b>",
+                             showarrow=False, font=dict(size=10, color="#006064"),
+                             xref="x", yref="y")
+
+    # Shortage window
+    _fig_time.add_shape(type="rect", x0=2030, y0=1.4, x1=2045, y1=2.2,
+                        fillcolor="#ffcdd2", line_color="#c62828", line_width=1.5)
+    _fig_time.add_annotation(x=2037.5, y=1.8,
+                             text="⚠️ <b>Shortage window</b> (Te demand 7× by 2040)",
+                             showarrow=False, font=dict(size=10, color="#c62828"),
+                             xref="x", yref="y")
+
+    # Overlap or gap indicator
+    _overlap = _retire_yr <= 2045
+    _fig_time.add_annotation(
+        x=2048, y=3.0,
+        text=(
+            f"✅ Recycled Te arrives in {_retire_yr}<br>"
+            f"Overlaps shortage window"
+            if _overlap else
+            f"❌ Recycled Te arrives in {_retire_yr}<br>"
+            f"Too late for shortage window"
+        ),
+        showarrow=False,
+        font=dict(size=11, color="#2e7d32" if _overlap else "#c62828"),
+        bgcolor="#e8f5e9" if _overlap else "#ffebee",
+        bordercolor="#2e7d32" if _overlap else "#c62828",
+        borderwidth=1,
+        xref="x", yref="y",
+    )
+
+    # Year markers
+    for yr, label, color in [
+        (_shortage_yr, "Shortage\nbegins", "#c62828"),
+        (_retire_yr,   f"Panels\nretire ({_lt_sel}yr)", "#006064"),
+    ]:
+        _fig_time.add_vline(x=yr, line_color=color, line_width=1.5, line_dash="dash")
+        _fig_time.add_annotation(x=yr, y=4.5, text=f"<b>{label}</b>",
+                                 showarrow=False, font=dict(size=9, color=color),
+                                 xref="x", yref="y")
+
+    st.plotly_chart(_fig_time, use_container_width=True)
+
+    if _lt_sel <= 30:
+        st.markdown(
+            f"<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
+            f"padding:10px 14px;border-radius:6px;font-size:13px;'>"
+            f"✅ With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
+            f"within the shortage window. Recycling can contribute to closing the gap in time.</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f"<div style='background:#ffebee;border-left:5px solid #c62828;"
+            f"padding:10px 14px;border-radius:6px;font-size:13px;'>"
+            f"⚠️ With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
+            f"<b>after the projected shortage window</b>. Recycling alone cannot address "
+            f"the 2030s supply gap. Other strategies (friendshoring, substitution, Te stockpiling) "
+            f"would be needed for that period.</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 3 — Cadmium Liability
+    # ══════════════════════════════════════════════════════════════════════════
+    st.subheader("3 — The Cadmium Liability: What Is Not Collected Becomes a Risk")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Te recycling and Cd management are inseparable — they are in the same absorber layer. "
+        "Every panel that is <b>not collected</b> for recycling is not just a missed Te "
+        "recovery opportunity. It is a potential environmental liability: "
+        "studies show that <b>62% of Cd in CdTe panels leaches into water within 360 days</b> "
+        "of landfill exposure."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
+    _col_rate_cd = st.slider(
+        "What collection rate do you think is realistic for your scenario? (%)",
+        min_value=0.0, max_value=100.0, step=5.0,
+        value=float(st.session_state["rec_collection"]),
+        key="crc_cd_col",
+        help="Move this to see how much Cd is at risk depending on collection rate.",
+    )
+
+    # Use student's retired PV (base year) × Cd content per GWp
+    # Cd content: 64.4 kg/MWp = 64,400 kg/GWp
+    _cd_per_gwp    = 64.4 * 1000  # kg/GWp
+    _total_ret_gwp = _ret_base      # base year
+    _cd_total      = _total_ret_gwp * _cd_per_gwp / 1000  # tonnes
+    _cd_collected  = _cd_total * (_col_rate_cd / 100)
+    _cd_not_col    = _cd_total * (1 - _col_rate_cd / 100)
+    _cd_at_risk    = _cd_not_col * 0.62  # 62% leaching rate
+
+    _cd1, _cd2, _cd3 = st.columns(3)
+    _cd1.metric("Retired PV (base yr)", f"{_total_ret_gwp:.0f} GWp",
+                help="From your CE page settings")
+    _cd2.metric("Cd NOT collected", f"{_cd_not_col:,.1f} t",
+                help=f"At {_col_rate_cd:.0f}% collection, {100-_col_rate_cd:.0f}% of panels go to landfill")
+    _cd3.metric("Cd at risk of leaching", f"{_cd_at_risk:,.1f} t",
+                delta=f"{_cd_at_risk:,.1f} t into water (360 days)",
+                delta_color="inverse",
+                help="62% of Cd in landfilled CdTe panels leaches into water within 360 days")
+
+    # Visual: donut showing collected vs not collected
+    _fig_cd = _go_crc.Figure(data=[_go_crc.Pie(
+        labels=["Collected & recycled safely", "Not collected (landfill risk)"],
+        values=[_col_rate_cd, 100 - _col_rate_cd],
+        hole=0.55,
+        marker_colors=["#2e7d32", "#c62828"],
+        textinfo="label+percent",
+        textfont=dict(size=12),
+    )])
+    _fig_cd.update_layout(
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        margin=dict(t=10, b=10),
+        height=280,
+        showlegend=False,
+        annotations=[dict(text=f"{_col_rate_cd:.0f}%<br>collected",
+                          x=0.5, y=0.5, font_size=14, showarrow=False,
+                          font_color="#2e7d32")],
+    )
+    st.plotly_chart(_fig_cd, use_container_width=True)
+
+    st.markdown(
+        "<p style='font-size:13px;color:#555;'>"
+        "This means the circular economy for CdTe is not just about Te supply security — "
+        "it is also a <b>toxicity management obligation</b>. "
+        "Low collection rates are not neutral: they actively create environmental harm.</p>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 4 — The Three Conditions
+    # ══════════════════════════════════════════════════════════════════════════
+    st.subheader("4 — Three Conditions for Circularity to Work")
+    st.markdown(
+        "<p style='font-size:14px;line-height:1.8;'>"
+        "Circular economy works for CdTe <b>if and only if</b> three conditions are met "
+        "simultaneously. A failure in any one of them undermines the whole system.</p>",
+        unsafe_allow_html=True,
+    )
+
+    _conditions = [
+        (
+            "1", "Collection rate must be high",
+            "> 60% needed for meaningful Te recovery",
+            "Currently ~10% in the US",
+            "Requires mandatory take-back policy or manufacturer responsibility laws",
+            "#e3f2fd", "#1565c0",
+            "Policy lever",
+        ),
+        (
+            "2", "Timing must align with demand",
+            "Recycled Te must arrive when the shortage exists",
+            "Longer lifetimes push retirement — and recycled Te — decades into the future",
+            "Strategic reserves, friendshoring, or substitution needed for the 2030s gap",
+            "#fff8e1", "#f57f17",
+            "Structural constraint",
+        ),
+        (
+            "3", "Recycling process must be clean",
+            "H₂SO₄/H₂O₂ leaching has its own LCA footprint",
+            "Current process contributes 3–4% of total CdTe module lifecycle impact",
+            "Emerging electrochemical recycling (in-situ H₂O₂ generation) may reduce this",
+            "#fce4ec", "#c62828",
+            "Technology lever",
+        ),
+    ]
+
+    for num, title, need, problem, solution, bg, tc, lever in _conditions:
+        st.markdown(
+            f"<div style='background:{bg};border-left:6px solid {tc};"
+            f"border-radius:8px;padding:14px 18px;margin-bottom:12px;'>"
+            f"<div style='display:flex;align-items:center;gap:10px;margin-bottom:8px;'>"
+            f"<div style='background:{tc};color:white;border-radius:50%;"
+            f"min-width:28px;height:28px;display:flex;align-items:center;"
+            f"justify-content:center;font-weight:700;font-size:13px;'>{num}</div>"
+            f"<b style='color:{tc};font-size:15px;'>{title}</b>"
+            f"<span style='background:{tc};color:white;padding:2px 10px;"
+            f"border-radius:12px;font-size:11px;margin-left:auto;'>{lever}</span>"
+            f"</div>"
+            f"<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"
+            f"font-size:13px;color:#333;'>"
+            f"<div><b style='color:{tc};'>What is needed</b><br>{need}</div>"
+            f"<div><b style='color:{tc};'>The problem</b><br>{problem}</div>"
+            f"<div><b style='color:{tc};'>The response</b><br>{solution}</div>"
+            f"</div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 5 — Overall Picture
+    # ══════════════════════════════════════════════════════════════════════════
+    st.subheader("5 — The Honest Picture: Circularity Is Conditional")
+
+    # Spider / radar chart: how well does student's scenario meet each condition?
+    _col_score   = min(100, (_col / 1.0) * 100)          # 0–100 based on their collection rate
+    _timing_score = max(0, min(100, (45 - _lt_sel) / 20 * 100))  # 100 at 25yr, 0 at 45yr
+    _eff_score   = (_eff * 100)                            # recycling efficiency as score
+
+    _fig_radar = _go_crc.Figure()
+    _fig_radar.add_trace(_go_crc.Scatterpolar(
+        r=[_col_score, _timing_score, _eff_score, _col_score],
+        theta=["Collection\nRate", "Timing\nAlignment", "Process\nCleanness", "Collection\nRate"],
+        fill="toself",
+        fillcolor="rgba(46,125,50,0.25)",
+        line_color="#2e7d32",
+        name="Your scenario",
+    ))
+    _fig_radar.add_trace(_go_crc.Scatterpolar(
+        r=[60, 60, 60, 60],
+        theta=["Collection\nRate", "Timing\nAlignment", "Process\nCleanness", "Collection\nRate"],
+        fill="toself",
+        fillcolor="rgba(198,40,40,0.08)",
+        line=dict(color="#c62828", dash="dot", width=1.5),
+        name="Minimum threshold",
+    ))
+    _fig_radar.update_layout(
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, 100],
+                            ticksuffix="%", tickfont=dict(size=10)),
+            bgcolor="#f9fbe7",
+        ),
+        paper_bgcolor="#e8f5e9",
+        font=dict(color="#1b5e20"),
+        legend=dict(orientation="h", y=-0.15),
+        margin=dict(t=20, b=20),
+        height=340,
+    )
+    st.plotly_chart(_fig_radar, use_container_width=True)
+
+    _all_pass = _col_score >= 60 and _timing_score >= 60 and _eff_score >= 60
+    if _all_pass:
+        st.markdown(
+            "<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
+            "padding:12px 16px;border-radius:6px;font-size:13px;'>"
+            "✅ <b>Your scenario meets all three conditions.</b> "
+            "Circular economy is likely to be effective under your assumptions. "
+            "Now consider: are those assumptions realistic for the actual US policy and "
+            "technology landscape?</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        _fails = []
+        if _col_score < 60:
+            _fails.append("collection rate is below the 60% threshold")
+        if _timing_score < 60:
+            _fails.append("panel lifetime creates a timing mismatch with the shortage window")
+        if _eff_score < 60:
+            _fails.append("recycling efficiency is below the minimum effective level")
+        st.markdown(
+            f"<div style='background:#fff3e0;border-left:5px solid #e65100;"
+            f"padding:12px 16px;border-radius:6px;font-size:13px;'>"
+            f"⚠️ <b>Your scenario fails {len(_fails)} condition(s):</b> "
+            f"{'; '.join(_fails)}. "
+            f"This does not mean circularity is impossible — it means specific interventions "
+            f"are needed before recycling can close the supply gap effectively.</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        "<div style='background:#1b5e20;padding:16px 22px;border-radius:10px;margin-top:16px;'>"
+        "<p style='color:white;font-size:14px;font-weight:700;margin:0 0 6px 0;'>"
+        "🔑 Key insight</p>"
+        "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
+        "Circular economy is not a default solution — it is a <b>conditional strategy</b>. "
+        "It requires simultaneous progress on policy (collection), infrastructure (timing), "
+        "and technology (clean recycling). Engineering judgment means knowing "
+        "which condition is the binding constraint in a given context — "
+        "and designing an intervention that targets that constraint specifically."
+        "</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+    if st.button("Continue to LCA of CdTe Solar →"):
+        go_to_page("🌍 LCA of CdTe Solar")

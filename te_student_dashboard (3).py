@@ -29,6 +29,28 @@ h1, h2, h3, h4, h5, h6 { color: #2e7d32 !important; }
 .stNumberInput > div > div > input,
 .stTextInput > div > div > input,
 .stSlider > div { background-color: #f1f8e9 !important; border-color: #a5d6a7 !important; }
+/* Text and number inputs share one look: same fill, border and corners, and the
+   +/- strip of a number input is part of the same box (current and older Streamlit markup) */
+[data-baseweb="input"],
+[data-baseweb="base-input"],
+[data-testid="stTextInputRootElement"],
+[data-testid="stNumberInputContainer"] { background-color: #f1f8e9 !important; }
+[data-baseweb="input"],
+[data-testid="stTextInputRootElement"],
+[data-testid="stNumberInputContainer"] {
+    border: 1px solid #a5d6a7 !important;
+    border-radius: 8px !important;
+}
+[data-baseweb="input"]:focus-within,
+[data-testid="stTextInputRootElement"]:focus-within,
+[data-testid="stNumberInputContainer"]:focus-within { border-color: #2e7d32 !important; }
+[data-testid="stNumberInputStepDown"],
+[data-testid="stNumberInputStepUp"] {
+    background-color: transparent !important;
+    color: #2e7d32 !important;
+}
+[data-testid="stNumberInputStepDown"]:hover,
+[data-testid="stNumberInputStepUp"]:hover { background-color: #dcedc8 !important; }
 hr { border-color: #a5d6a7 !important; }
 [data-testid="stDataFrame"] { background-color: #f1f8e9 !important; }
 .stDownloadButton > button {
@@ -105,7 +127,6 @@ DEFAULTS = {
     "pb_method": "",
     "pb_ce": "",
     "pb_risk": "",
-    "pb_recommendation": "",
     "pb_submitted": False,
     # Navigation
     "_current_page": "🏠 Welcome",
@@ -1690,14 +1711,14 @@ elif page == "🔍 Scenario Analysis":
         "Your Task</p>"
         "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
         "You are an engineering advisor writing a brief for a decision-maker at the US Department of Energy. "
-        "Based on your analysis across all pages of this dashboard, answer the six questions below. "
+        "Based on your analysis across all pages of this dashboard, answer the five questions below. "
         "Each answer should be <b>2–4 sentences</b>. Use evidence from your numbers and the LCA findings. "
         "There is no single right answer — you are being assessed on your <b>reasoning and justification</b>."
         "</p></div>",
         unsafe_allow_html=True,
     )
 
-    # ── Six structured questions ───────────────────────────────────────────────
+    # ── Five structured questions ──────────────────────────────────────────────
     st.subheader("Question 1 — Sourcing Strategy")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
@@ -1766,26 +1787,7 @@ elif page == "🔍 Scenario Analysis":
         key="ta_risk",
     )
 
-    st.subheader("Question 5 — Overall Recommendation")
-    st.markdown(
-        "<p style='font-size:13px;color:#555;'>"
-        "Questions 1–4 each covered one piece of the strategy, so do not repeat those answers here — "
-        "make the call. In one paragraph a policymaker could read in 60 seconds, name the "
-        "<b>single lever</b> you would pull first to close the gap on your Results page: "
-        "<b>supply</b> (sourcing or processing), <b>demand</b> (less Te per MWp), or <b>recycling</b>. "
-        "Back the choice with at least one number from your own results, and say what you would leave for later. "
-        "Be specific and decisive — a policymaker needs a clear recommendation, not a list of uncertainties.</p>",
-        unsafe_allow_html=True,
-    )
-    pb_recommendation = st.text_area(
-        "Your recommendation:",
-        value=st.session_state["pb_recommendation"],
-        height=150,
-        placeholder="e.g. I would pull [supply / demand / recycling] first because my results show... I would leave [the other levers] for later because...",
-        key="ta_recommendation",
-    )
-
-    st.subheader("Question 6 — Stress-Testing Your Strategy")
+    st.subheader("Question 5 — Stress-Testing Your Strategy")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
         "On the Circularity Reality Check page you saw how your recycling numbers change "
@@ -1813,7 +1815,6 @@ elif page == "🔍 Scenario Analysis":
             st.session_state["pb_method"]         = pb_method
             st.session_state["pb_ce"]             = pb_ce
             st.session_state["pb_risk"]           = pb_risk
-            st.session_state["pb_recommendation"] = pb_recommendation
             st.session_state["pb_stress"]         = pb_stress
             st.session_state["pb_submitted"]      = True
             st.success("Answers saved!")
@@ -1851,11 +1852,7 @@ QUESTION 4 — SUPPLY CHAIN RISK
 {'─'*40}
 {pb_risk if pb_risk.strip() else '[Not answered]'}
 
-QUESTION 5 — OVERALL RECOMMENDATION
-{'─'*40}
-{pb_recommendation if pb_recommendation.strip() else '[Not answered]'}
-
-QUESTION 6 — STRESS-TESTING YOUR STRATEGY
+QUESTION 5 — STRESS-TESTING YOUR STRATEGY
 {'─'*40}
 {st.session_state.get('pb_stress','') or '[Not answered]'}
 
@@ -1876,7 +1873,7 @@ Source: Material Availability Dashboard
     with st.expander("View grading rubric"):
         st.markdown(
             "<p style='font-size:13px;color:#555;margin-bottom:10px;'>"
-            "Each question is worth 4 points. Total = 24 points.</p>",
+            "Each question is worth 4 points. Total = 20 points.</p>",
             unsafe_allow_html=True,
         )
         _rubric = [

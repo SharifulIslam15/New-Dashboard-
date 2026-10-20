@@ -1558,13 +1558,7 @@ elif page == "🌍 LCA of CdTe Solar":
     # ── Key takeaways ─────────────────────────────────────────────────────────
     st.subheader("6 — Key Takeaways")
     _takeaways = [
-        ("Location matters",
-         "Sourcing and processing anode slimes in Canada or the US reduces carbon footprint and water scarcity — "
-         "supporting reshoring and friendshoring strategies."),
-        ("Method matters",
-         "Hydro-pyrometallurgical processing consistently outperforms hydrometallurgy across all "
-         "four impact categories. The US and Canada both already use this method."),
-        ("Carbon footprint depends on where and how Te is produced",
+        ("Your Te supply has a calculable carbon cost",
          "The GWP of Te ranges from ~5 kg CO₂/kg (Canada, HPM) to ~34 kg CO₂/kg (Japan, HM). "
          "Your sourcing choice has a direct, calculable impact on total CO₂ emissions."),
         ("Circular Economy reduces the burden",
@@ -1696,14 +1690,14 @@ elif page == "🔍 Scenario Analysis":
         "Your Task</p>"
         "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
         "You are an engineering advisor writing a brief for a decision-maker at the US Department of Energy. "
-        "Based on your analysis across all pages of this dashboard, answer the five questions below. "
+        "Based on your analysis across all pages of this dashboard, answer the six questions below. "
         "Each answer should be <b>2–4 sentences</b>. Use evidence from your numbers and the LCA findings. "
         "There is no single right answer — you are being assessed on your <b>reasoning and justification</b>."
         "</p></div>",
         unsafe_allow_html=True,
     )
 
-    # ── Five structured questions ─────────────────────────────────────────────
+    # ── Six structured questions ───────────────────────────────────────────────
     st.subheader("Question 1 — Sourcing Strategy")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
@@ -1775,9 +1769,11 @@ elif page == "🔍 Scenario Analysis":
     st.subheader("Question 5 — Overall Recommendation")
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
-        "Imagine you must write one paragraph for a policymaker who has 60 seconds to read it. "
-        "Summarize your overall recommendation for a sustainable US tellurium supply strategy "
-        "for CdTe solar. Integrate sourcing, processing method, circular economy, and LCA considerations. "
+        "Questions 1–4 each covered one piece of the strategy, so do not repeat those answers here — "
+        "make the call. In one paragraph a policymaker could read in 60 seconds, name the "
+        "<b>single lever</b> you would pull first to close the gap on your Results page: "
+        "<b>supply</b> (sourcing or processing), <b>demand</b> (less Te per MWp), or <b>recycling</b>. "
+        "Back the choice with at least one number from your own results, and say what you would leave for later. "
         "Be specific and decisive — a policymaker needs a clear recommendation, not a list of uncertainties.</p>",
         unsafe_allow_html=True,
     )
@@ -1785,7 +1781,7 @@ elif page == "🔍 Scenario Analysis":
         "Your recommendation:",
         value=st.session_state["pb_recommendation"],
         height=150,
-        placeholder="e.g. To support sustainable growth of US CdTe solar manufacturing, I recommend...",
+        placeholder="e.g. I would pull [supply / demand / recycling] first because my results show... I would leave [the other levers] for later because...",
         key="ta_recommendation",
     )
 

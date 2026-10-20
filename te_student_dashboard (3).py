@@ -367,80 +367,68 @@ elif page == "🔗 Hitchhiker Concept":
     )
 
     import plotly.graph_objects as _go2
+
+    # Flow diagram on a 0-100 (across) by 0-44 (up) grid, about 10 px per unit vertically.
+    # Boxes stretch with the page width; text and arrowheads keep a fixed, readable size.
+    # Every arrow runs at the centre height of the boxes it connects, edge to edge.
+    _hh_AMBER, _hh_AMBER_TXT = "#f9a825", "#e65100"
+    _hh_INDIGO, _hh_INDIGO_TXT = "#3949ab", "#1a237e"
+    _hh_GREEN, _hh_GREEN_TXT = "#2e7d32", "#1b5e20"
+    _hh_CYAN, _hh_CYAN_TXT = "#00838f", "#006064"
+    _hh_RED = "#c62828"
+
     _fig_hh = _go2.Figure()
+    _hh_shapes, _hh_notes = [], []
 
-    # Background
+    def _hh_box(x0, y0, x1, y1, fill, edge, title, sub, txt):
+        """Filled box with a bold title and a lighter second line, both centred."""
+        _hh_shapes.append(dict(type="rect", x0=x0, y0=y0, x1=x1, y1=y1,
+                               fillcolor=fill, line=dict(color=edge, width=2.5)))
+        xm, ym = (x0 + x1) / 2, (y0 + y1) / 2
+        _hh_notes.append(dict(x=xm, y=ym + 1.6, text=f"<b>{title}</b>", showarrow=False,
+                              xref="x", yref="y", font=dict(size=19, color=txt)))
+        _hh_notes.append(dict(x=xm, y=ym - 1.7, text=sub, showarrow=False,
+                              xref="x", yref="y", font=dict(size=15, color=txt)))
+
+    def _hh_arrow(x_tail, y_tail, x_head, y_head, color, label=None, label_color=None):
+        """Thick arrow from tail to head (data coordinates), optional label above the shaft."""
+        _hh_notes.append(dict(x=x_head, y=y_head, ax=x_tail, ay=y_tail,
+                              xref="x", yref="y", axref="x", ayref="y", text="",
+                              showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=3.5,
+                              arrowcolor=color))
+        if label:
+            _hh_notes.append(dict(x=(x_tail + x_head) / 2, y=y_tail + 2.3,
+                                  text=f"<i>{label}</i>", showarrow=False,
+                                  xref="x", yref="y",
+                                  font=dict(size=15, color=label_color or color)))
+
+    # Sources (left), the Te supply pool (centre), and the CdTe panels it feeds (right)
+    _hh_box(2, 27.5, 26, 38.5, "#ffe082", _hh_AMBER, "Copper Mining", "& Electrorefining", _hh_AMBER_TXT)
+    _hh_box(2, 13.5, 26, 24.5, "#c5cae9", _hh_INDIGO, "Nickel Mining", "& Refining", _hh_INDIGO_TXT)
+    _hh_box(42, 12, 66, 40, "#a5d6a7", _hh_GREEN, "Tellurium (Te)", "supply pool", _hh_GREEN_TXT)
+    _hh_box(77, 19, 98, 33, "#b2ebf2", _hh_CYAN, "CdTe Solar", "panels", _hh_CYAN_TXT)
+
+    _hh_arrow(26, 33, 42, 33, "#f57c00", "anode slimes", _hh_AMBER_TXT)
+    _hh_arrow(26, 19, 42, 19, _hh_INDIGO, "residues", _hh_INDIGO_TXT)
+    _hh_arrow(66, 26, 77, 26, _hh_GREEN)
+
+    # Key constraint, tied to the supply pool by a short dotted connector
+    _hh_shapes.append(dict(type="line", x0=54, y0=12, x1=54, y1=7.0,
+                           line=dict(color=_hh_RED, width=2, dash="dot")))
+    _hh_notes.append(dict(x=54, y=5, xref="x", yref="y", showarrow=False,
+                          text="<b>Te supply is controlled by Cu & Ni output, not by Te demand</b>",
+                          font=dict(size=16, color=_hh_RED), bgcolor="#ffebee",
+                          bordercolor=_hh_RED, borderwidth=2, borderpad=9))
+
     _fig_hh.update_layout(
-        xaxis=dict(visible=False, range=[0, 10]),
-        yaxis=dict(visible=False, range=[0, 5]),
+        shapes=_hh_shapes, annotations=_hh_notes,
+        xaxis=dict(visible=False, range=[0, 100], fixedrange=True),
+        yaxis=dict(visible=False, range=[0, 44], fixedrange=True),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
-        margin=dict(l=10, r=10, t=10, b=10),
-        height=260,
+        margin=dict(l=10, r=10, t=10, b=10), height=460, showlegend=False,
     )
 
-    # Cu box
-    _fig_hh.add_shape(type="rect", x0=0.2, y0=1.8, x1=2.8, y1=3.2,
-                      fillcolor="#ffe082", line_color="#f9a825", line_width=2)
-    _fig_hh.add_annotation(x=1.5, y=2.7, text="<b>Copper Mining</b>", showarrow=False,
-                            font=dict(size=13, color="#e65100"))
-    _fig_hh.add_annotation(x=1.5, y=2.3, text="& Electrorefining", showarrow=False,
-                            font=dict(size=11, color="#e65100"))
-
-    # Ni box
-    _fig_hh.add_shape(type="rect", x0=0.2, y0=0.3, x1=2.8, y1=1.6,
-                      fillcolor="#c5cae9", line_color="#3949ab", line_width=2)
-    _fig_hh.add_annotation(x=1.5, y=1.1, text="<b>Nickel Mining</b>", showarrow=False,
-                            font=dict(size=13, color="#1a237e"))
-    _fig_hh.add_annotation(x=1.5, y=0.65, text="& Refining", showarrow=False,
-                            font=dict(size=11, color="#1a237e"))
-
-    # Arrow Cu → Te
-    _fig_hh.add_annotation(x=4.5, y=2.7, ax=2.8, ay=2.7,
-                            xref="x", yref="y", axref="x", ayref="y",
-                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#f9a825",
-                            text="")
-    _fig_hh.add_annotation(x=3.65, y=2.9, text="anode slimes", showarrow=False,
-                            font=dict(size=10, color="#e65100"))
-
-    # Arrow Ni → Te
-    _fig_hh.add_annotation(x=4.5, y=1.1, ax=2.8, ay=1.1,
-                            xref="x", yref="y", axref="x", ayref="y",
-                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#3949ab",
-                            text="")
-    _fig_hh.add_annotation(x=3.65, y=1.3, text="residues", showarrow=False,
-                            font=dict(size=10, color="#1a237e"))
-
-    # Te supply box
-    _fig_hh.add_shape(type="rect", x0=4.5, y0=1.3, x1=7.0, y1=2.7,
-                      fillcolor="#a5d6a7", line_color="#2e7d32", line_width=2)
-    _fig_hh.add_annotation(x=5.75, y=2.2, text="<b>Tellurium (Te)</b>", showarrow=False,
-                            font=dict(size=13, color="#1b5e20"))
-    _fig_hh.add_annotation(x=5.75, y=1.75, text="supply pool", showarrow=False,
-                            font=dict(size=11, color="#1b5e20"))
-
-    # Arrow Te → CdTe
-    _fig_hh.add_annotation(x=9.2, y=2.0, ax=7.0, ay=2.0,
-                            xref="x", yref="y", axref="x", ayref="y",
-                            showarrow=True, arrowhead=2, arrowwidth=2.5, arrowcolor="#2e7d32",
-                            text="")
-
-    # CdTe PV box
-    _fig_hh.add_shape(type="rect", x0=7.2, y0=1.3, x1=9.8, y1=2.7,
-                      fillcolor="#b2ebf2", line_color="#00838f", line_width=2)
-    _fig_hh.add_annotation(x=8.5, y=2.2, text="<b>CdTe Solar</b>", showarrow=False,
-                            font=dict(size=13, color="#006064"))
-    _fig_hh.add_annotation(x=8.5, y=1.75, text="panels", showarrow=False,
-                            font=dict(size=11, color="#006064"))
-
-    # Key constraint label
-    _fig_hh.add_annotation(
-        x=5.75, y=3.5,
-        text="Te supply is controlled by Cu & Ni output, not by Te demand",
-        showarrow=False, font=dict(size=11, color="#c62828"),
-        bgcolor="#ffebee", bordercolor="#c62828", borderwidth=1,
-    )
-
-    st.plotly_chart(_fig_hh, use_container_width=True)
+    st.plotly_chart(_fig_hh, use_container_width=True, config={"staticPlot": True})
 
 
 

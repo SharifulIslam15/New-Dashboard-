@@ -1122,198 +1122,159 @@ elif page == "🌍 LCA of CdTe Solar":
     # ── System boundary diagram ───────────────────────────────────────────────
     st.subheader("2 — System Boundary: From Copper Mine to CdTe Solar Module")
     info_box(
-        "The diagram below reproduces the system boundary from Hanna & Anctil (2025). "
-        "It shows four real-world supply chain scenarios (SC-1 to SC-4) using different companies "
-        "and countries at each processing stage. "
-        "<b>Copper mining & beneficiation dominates all impact categories</b>, followed by anode slime processing."
+        "This is the system boundary used by Hanna &amp; Anctil (2025). Everything inside the "
+        "dashed line is counted in the LCA, from copper mining to the finished CdTe panel. "
+        "Tellurium is mainly recovered as a <b>by-product of copper refining</b>: it comes out of the "
+        "<b>anode slime</b> left behind during electrorefining. "
+        "Shaded boxes are processes, white boxes are the products they make, and "
+        "<b>T</b> marks transport between facilities."
     )
 
     import plotly.graph_objects as _go_sb
 
-    # ── Layout constants ─────────────────────────────────────────────────────
-    # Left column: process flow boxes  (x: 0.5–3.5)
-    # Right columns: SC-1..SC-4        (x centres: 5, 7, 9, 11)
-    # Rows (y, top→bottom): 9 stages from y=9.5 down to y=1.0
-    _W, _H = 2.6, 0.65          # box width / half-height
-    _SC_X  = [5.0, 7.2, 9.4, 11.6]
-    _SC_LABELS = ["SC-1", "SC-2", "SC-3", "SC-4"]
-    _SC_COLORS = ["#c62828", "#c62828", "#c62828", "#1565c0"]   # red/red/red/blue headers
+    # Drawing units are pixel-like (x to the right, y DOWN). The y-axis is reversed and locked
+    # 1:1 to the x-axis, so circles stay round and boxes keep their proportions at any width.
+    _sb_W = 600                          # canvas width
+    _sb_BX0, _sb_BX1 = 70, 545           # dashed boundary: left / right edge
+    _sb_X0, _sb_X1 = 145, 495            # process & product boxes: left / right edge
+    _sb_XM = (_sb_X0 + _sb_X1) / 2       # centre line of the boxes
+    _sb_XC = 108                         # x of the vertical transport connector
+    _sb_PROC_H, _sb_PROD_H = 38, 22      # box heights
+    _sb_PROD_GAP = 3                     # gap between stacked product boxes
+    _sb_PD_GAP = 10                      # process -> its first product (arrow gap)
+    _sb_GRP_GAP = 26                     # last product -> next process (T circle gap)
+    _sb_TOP = 104                        # top edge of the first box
 
-    # Process stages: (label, y-centre, show_T_left)
-    _stages = [
-        ("Copper Mining &\nBeneficiation",  9.3,  False),
-        ("Copper Concentrate",               8.2,  False),
-        ("Smelting",                         7.1,  True),
-        ("Copper Anode",                     6.2,  False),
-        ("Electrorefining",                  5.3,  True),
-        ("Anode Slime Processing",           4.2,  True),
-        ("Refining",                         3.1,  True),
-        ("SG-CdTe Production",               2.0,  True),
-        ("CdTe Solar Panel",                 0.9,  True),
+    _sb_LINE, _sb_PROC, _sb_TXT = "#37474f", "#c8e6c9", "#263238"
+    _sb_BOUND, _sb_T = "#1b5e20", "#2e7d32"
+
+    # (process, [products it makes]). The FIRST product in each list is the one that is
+    # transported to the next process (shown by the T connector on the left).
+    _sb_chain = [
+        ("Copper Mining &amp;<br>Beneficiation", ["Copper Concentrate", "Molybdenum"]),
+        ("Smelting",                             ["Copper Anode"]),
+        ("Electrorefining",                      ["Anode Slime", "Copper Cathode"]),
+        ("Anode Slime<br>Processing",            ["Copper Telluride", "Selenium", "Gold", "Silver", "Copper"]),
+        ("Refining",                             ["SG-Te"]),
+        ("SG-CdTe<br>Production",                ["SG-CdTe"]),
+        ("CdTe PV<br>Production",                ["CdTe solar panel"]),
     ]
 
-    # SC company labels per stage row (None = same company as above / shared)
-    # SC-1=China/Jiangxi, SC-2=Canada/Glencore, SC-3=Japan/JX, SC-4=USA/Rio Tinto
-    _sc_data = {
-        # stage_y : [ (flag_color, country, company) x4 ]
-        9.3: [
-            ("#de2910","China","Jiangxi Copper Co"),
-            ("#ff0000","Canada","Glencore"),
-            ("#d52b1e","Chile","Escondida Mine"),
-            ("#3c3b6e","USA","Rio Tinto –\nKennecott"),
-        ],
-        7.1: [
-            ("#de2910","China","Jiangxi Copper Co"),
-            ("#ff0000","Canada","Glencore –\nHorne Smelter"),
-            ("#bc002d","Japan","JX Metals –\nSaganoseki"),
-            ("#3c3b6e","USA","Rio Tinto"),
-        ],
-        5.3: [
-            ("#de2910","China","Jiangxi Copper Co"),
-            ("#ff0000","Canada","Glencore – CCR"),
-            ("#bc002d","Japan","JX Metals –\nSaganoseki"),
-            ("#3c3b6e","USA","Rio Tinto"),
-        ],
-        4.2: [
-            ("#de2910","China","Jiangxi Copper Co"),
-            ("#ff0000","Canada","Glencore – CCR"),
-            ("#bc002d","Japan","JX Metals –\nSaganoseki"),
-            ("#3c3b6e","USA","Rio Tinto"),
-        ],
-        3.1: [
-            ("#de2910","China","Jiangxi Copper Co"),
-            ("#ff0000","Canada","5N Plus"),
-            ("#ff0000","Canada","5N Plus"),
-            ("#ff0000","Canada","5N Plus"),
-        ],
-        2.0: [
-            ("#ff0000","Canada","5N Plus"),
-            ("#ff0000","Canada","5N Plus"),
-            ("#ff0000","Canada","5N Plus"),
-            ("#ff0000","Canada","5N Plus"),
-        ],
-        0.9: [
-            ("#3c3b6e","USA","First Solar"),
-            ("#3c3b6e","USA","First Solar"),
-            ("#3c3b6e","USA","First Solar"),
-            ("#3c3b6e","USA","First Solar"),
-        ],
-    }
+    # ── Work out every box position, top to bottom ────────────────────────────
+    _sb_procs, _sb_prods, _sb_links = [], [], []
+    _sb_y = _sb_TOP
+    for _sb_i, (_sb_plabel, _sb_plist) in enumerate(_sb_chain):
+        _sb_py0, _sb_py1 = _sb_y, _sb_y + _sb_PROC_H
+        _sb_procs.append((_sb_plabel, _sb_py0, _sb_py1))
+        _sb_y = _sb_py1 + _sb_PD_GAP
+        for _sb_j, _sb_name in enumerate(_sb_plist):
+            _sb_prods.append((_sb_name, _sb_y, _sb_y + _sb_PROD_H))
+            if _sb_j == 0:
+                _sb_first_mid = _sb_y + _sb_PROD_H / 2
+            _sb_y += _sb_PROD_H + _sb_PROD_GAP
+        _sb_last_bottom = _sb_y - _sb_PROD_GAP
+        if _sb_i < len(_sb_chain) - 1:        # transport link to the next process
+            _sb_next_mid = _sb_last_bottom + _sb_GRP_GAP + _sb_PROC_H / 2
+            _sb_links.append((_sb_first_mid, _sb_next_mid, _sb_last_bottom + _sb_GRP_GAP / 2))
+        _sb_y = _sb_last_bottom + _sb_GRP_GAP
 
-    _fig_sb2 = _go_sb.Figure()
-    _fig_sb2.update_layout(
-        xaxis=dict(visible=False, range=[0, 13.5]),
-        yaxis=dict(visible=False, range=[0, 10.8]),
-        plot_bgcolor="white", paper_bgcolor="#e8f5e9",
-        margin=dict(l=5, r=5, t=40, b=20),
-        height=680, showlegend=False,
+    _sb_BY0, _sb_BY1 = 68, _sb_last_bottom + 28      # dashed boundary: top / bottom
+    _sb_H = _sb_BY1 + 140                            # canvas height
+
+    # ── Small drawing helpers ─────────────────────────────────────────────────
+    _sb_shapes, _sb_notes = [], []
+
+    def _sb_rrect(x0, y0, x1, y1, r):
+        """SVG path for a rounded rectangle."""
+        return (f"M {x0+r},{y0} L {x1-r},{y0} Q {x1},{y0} {x1},{y0+r} "
+                f"L {x1},{y1-r} Q {x1},{y1} {x1-r},{y1} "
+                f"L {x0+r},{y1} Q {x0},{y1} {x0},{y1-r} "
+                f"L {x0},{y0+r} Q {x0},{y0} {x0+r},{y0} Z")
+
+    def _sb_text(x, y, text, size=12, color=_sb_TXT, **kw):
+        _sb_notes.append(dict(x=x, y=y, text=text, showarrow=False, xref="x", yref="y",
+                              font=dict(size=size, color=color), **kw))
+
+    def _sb_arrow(x_tail, y_tail, x_head, y_head, width=1.4):
+        _sb_notes.append(dict(x=x_head, y=y_head, ax=x_tail, ay=y_tail,
+                              xref="x", yref="y", axref="x", ayref="y",
+                              showarrow=True, text="", arrowhead=2, arrowsize=1.1,
+                              arrowwidth=width, arrowcolor=_sb_LINE))
+
+    def _sb_line(path, width=1.4):
+        _sb_shapes.append(dict(type="path", path=path, fillcolor="rgba(0,0,0,0)",
+                               line=dict(color=_sb_LINE, width=width)))
+
+    # ── Dashed system boundary (white inside, so "in" vs "out" is obvious) ────
+    _sb_shapes.append(dict(type="path", path=_sb_rrect(_sb_BX0, _sb_BY0, _sb_BX1, _sb_BY1, 26),
+                           fillcolor="#ffffff", layer="below",
+                           line=dict(color=_sb_BOUND, width=2.2, dash="dash")))
+
+    # "System Boundary" bracket + rotated label on the left edge
+    _sb_ya, _sb_yb = _sb_BY0 + 60, _sb_BY0 + 205
+    _sb_line(f"M {_sb_BX0},{_sb_ya} L {_sb_BX0-40},{_sb_ya} L {_sb_BX0-40},{_sb_yb} L {_sb_BX0},{_sb_yb}")
+    _sb_text(_sb_BX0 - 20, (_sb_ya + _sb_yb) / 2, "<b>System Boundary</b>", size=13, textangle=-90)
+
+    # ── Inputs (top) and outputs (bottom) ─────────────────────────────────────
+    for _sb_x, _sb_lbl in zip((190, 320, 450), ("Chemicals", "Water", "Energy")):
+        _sb_text(_sb_x, 24, _sb_lbl, size=13)
+        _sb_arrow(_sb_x, 40, _sb_x, _sb_TOP - 6, width=1.9)
+    for _sb_x, _sb_lbl in zip((208, 426), ("Waste", "Wastewater")):
+        _sb_arrow(_sb_x, _sb_BY1 - 12, _sb_x, _sb_BY1 + 46, width=1.9)
+        _sb_text(_sb_x, _sb_BY1 + 63, _sb_lbl, size=13)
+
+    # ── Process boxes (shaded, rounded) with an arrow down to their first product ─
+    for _sb_lbl, _sb_y0, _sb_y1 in _sb_procs:
+        _sb_shapes.append(dict(type="path", path=_sb_rrect(_sb_X0, _sb_y0, _sb_X1, _sb_y1, 8),
+                               fillcolor=_sb_PROC, line=dict(color=_sb_LINE, width=1.5)))
+        _sb_text(_sb_XM, (_sb_y0 + _sb_y1) / 2, f"<b>{_sb_lbl}</b>", size=13)
+        _sb_arrow(_sb_XM, _sb_y1, _sb_XM, _sb_y1 + _sb_PD_GAP, width=1.3)
+
+    # ── Product boxes (white, square) ─────────────────────────────────────────
+    for _sb_lbl, _sb_y0, _sb_y1 in _sb_prods:
+        _sb_shapes.append(dict(type="rect", x0=_sb_X0, x1=_sb_X1, y0=_sb_y0, y1=_sb_y1,
+                               fillcolor="#ffffff", line=dict(color=_sb_LINE, width=1.1)))
+        _sb_text(_sb_XM, (_sb_y0 + _sb_y1) / 2, _sb_lbl, size=12.5)
+
+    # ── Transport links: first product -> T -> next process ───────────────────
+    for _sb_yf, _sb_yt, _sb_yc in _sb_links:
+        _sb_line(f"M {_sb_X0},{_sb_yf} L {_sb_XC},{_sb_yf} L {_sb_XC},{_sb_yt}")
+        _sb_arrow(_sb_XC, _sb_yt, _sb_X0, _sb_yt)
+    for _sb_yf, _sb_yt, _sb_yc in _sb_links:
+        _sb_shapes.append(dict(type="circle", x0=_sb_XC - 12, x1=_sb_XC + 12,
+                               y0=_sb_yc - 12, y1=_sb_yc + 12,
+                               fillcolor="#ffffff", line=dict(color=_sb_T, width=1.8)))
+        _sb_text(_sb_XC, _sb_yc, "<b>T</b>", size=13, color=_sb_T)
+
+    # ── Key (bottom) ──────────────────────────────────────────────────────────
+    _sb_ky = _sb_BY1 + 112
+    _sb_shapes.append(dict(type="path", path=_sb_rrect(75, _sb_ky - 10, 105, _sb_ky + 10, 5),
+                           fillcolor=_sb_PROC, line=dict(color=_sb_LINE, width=1.3)))
+    _sb_text(113, _sb_ky, "Process", size=12, xanchor="left")
+    _sb_shapes.append(dict(type="rect", x0=205, x1=235, y0=_sb_ky - 10, y1=_sb_ky + 10,
+                           fillcolor="#ffffff", line=dict(color=_sb_LINE, width=1.1)))
+    _sb_text(243, _sb_ky, "Product", size=12, xanchor="left")
+    _sb_shapes.append(dict(type="circle", x0=322, x1=346, y0=_sb_ky - 12, y1=_sb_ky + 12,
+                           fillcolor="#ffffff", line=dict(color=_sb_T, width=1.8)))
+    _sb_text(334, _sb_ky, "<b>T</b>", size=13, color=_sb_T)
+    _sb_text(356, _sb_ky, "<i>Transportation of<br>intermediate products</i>", size=12, xanchor="left")
+
+    # ── Assemble the figure ───────────────────────────────────────────────────
+    _fig_sb = _go_sb.Figure()
+    _fig_sb.update_layout(
+        shapes=_sb_shapes, annotations=_sb_notes,
+        xaxis=dict(range=[0, _sb_W], visible=False, constrain="domain", fixedrange=True),
+        yaxis=dict(range=[_sb_H, 0], visible=False, scaleanchor="x", scaleratio=1,
+                   constrain="domain", fixedrange=True),
+        plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
+        margin=dict(l=0, r=0, t=8, b=8), height=int(_sb_H) + 16, showlegend=False,
     )
-
-    # ── Draw dashed system boundary box ──────────────────────────────────────
-    _fig_sb2.add_shape(type="rect", x0=0.1, y0=0.2, x1=3.9, y1=10.5,
-                       fillcolor="rgba(0,0,0,0)", line=dict(color="#555", width=1.5, dash="dash"))
-    _fig_sb2.add_annotation(x=0.15, y=5.35, text="<b>System<br>Boundary</b>", showarrow=False,
-                            textangle=-90, font=dict(size=10, color="#555"), xref="x", yref="y")
-
-    # ── SC header labels ──────────────────────────────────────────────────────
-    for sc_x, sc_lbl, sc_c in zip(_SC_X, _SC_LABELS, _SC_COLORS):
-        _fig_sb2.add_shape(type="rect", x0=sc_x-1.0, y0=10.1, x1=sc_x+1.0, y1=10.6,
-                           fillcolor="#f0f0f0", line_color="#aaa", line_width=1)
-        _fig_sb2.add_annotation(x=sc_x, y=10.35, text=f"<b>{sc_lbl}</b>",
-                                showarrow=False, font=dict(size=13, color="#222"), xref="x", yref="y")
-
-    # ── Top inputs (Chemicals, Water, Energy) ────────────────────────────────
-    for i, inp in enumerate(["Chemicals", "Water", "Energy"]):
-        _xi = 0.9 + i * 1.1
-        _fig_sb2.add_trace(_go_sb.Scatter(
-            x=[_xi, _xi], y=[10.75, 10.5], mode="lines",
-            line=dict(color="#555", width=1.2, dash="dash"), hoverinfo="skip"
-        ))
-        _fig_sb2.add_annotation(x=_xi, y=10.78, text=inp, showarrow=False,
-                                font=dict(size=9, color="#555"), xref="x", yref="y")
-
-    # ── Draw process boxes and downward arrows ────────────────────────────────
-    _BOX_FILL = "#f5f5f5"
-    _BOX_LINE = "#555"
-    for idx, (lbl, yc, show_T) in enumerate(_stages):
-        # Process box
-        _fig_sb2.add_shape(type="rect", x0=0.5, y0=yc-_H, x1=3.5, y1=yc+_H,
-                           fillcolor=_BOX_FILL, line_color=_BOX_LINE, line_width=1.3)
-        for li, ln in enumerate(lbl.split("\n")):
-            offset = 0.2 if len(lbl.split("\n")) == 2 else 0
-            _fig_sb2.add_annotation(x=2.0, y=yc + (offset if li == 0 else -offset),
-                                    text=f"<b>{ln}</b>", showarrow=False,
-                                    font=dict(size=10, color="#222"), xref="x", yref="y")
-        # T circle on left side
-        if show_T:
-            _fig_sb2.add_shape(type="circle", x0=0.05, y0=yc-0.28, x1=0.55, y1=yc+0.28,
-                               fillcolor="white", line_color="#555", line_width=1.2)
-            _fig_sb2.add_annotation(x=0.3, y=yc, text="<b>T</b>", showarrow=False,
-                                    font=dict(size=9, color="#333"), xref="x", yref="y")
-        # Downward arrow to next stage
-        if idx < len(_stages) - 1:
-            next_yc = _stages[idx+1][1]
-            _fig_sb2.add_trace(_go_sb.Scatter(
-                x=[2.0, 2.0], y=[yc-_H, next_yc+_H], mode="lines",
-                line=dict(color="#555", width=1.3), hoverinfo="skip"
-            ))
-            _fig_sb2.add_annotation(x=2.0, y=next_yc+_H, text="▼", showarrow=False,
-                                    font=dict(size=10, color="#555"), xref="x", yref="y")
-
-    # ── Bottom outputs (Waste, Wastewater) ────────────────────────────────────
-    for i, out in enumerate(["Waste", "Wastewater"]):
-        _xo = 1.2 + i * 1.5
-        _fig_sb2.add_trace(_go_sb.Scatter(
-            x=[_xo, _xo], y=[0.9-_H, 0.1], mode="lines",
-            line=dict(color="#555", width=1.2, dash="dash"), hoverinfo="skip"
-        ))
-        _fig_sb2.add_annotation(x=_xo, y=0.05, text=out, showarrow=False,
-                                font=dict(size=9, color="#555"), xref="x", yref="y")
-
-    # ── Draw SC flag circles + company labels for keyed rows ─────────────────
-    _SHOWN_ROWS = sorted(_sc_data.keys(), reverse=True)
-    _FLAG_COLORS = {
-        "China":  [("#de2910", "#ffde00")],   # red bg, yellow star
-        "Canada": [("#ff0000", "#ffffff")],
-        "Chile":  [("#d52b1e", "#ffffff")],
-        "Japan":  [("#ffffff", "#bc002d")],
-        "USA":    [("#3c3b6e", "#ffffff")],
-    }
-    for row_y in _SHOWN_ROWS:
-        entries = _sc_data[row_y]
-        for sc_x, (flag_color, country, company) in zip(_SC_X, entries):
-            # Circle (flag representation)
-            _fig_sb2.add_shape(type="circle",
-                               x0=sc_x-0.38, y0=row_y-0.38, x1=sc_x+0.38, y1=row_y+0.38,
-                               fillcolor=flag_color, line_color="#999", line_width=1)
-            # Country label above circle
-            _fig_sb2.add_annotation(x=sc_x, y=row_y+0.52, text=f"<b>{country}</b>",
-                                    showarrow=False, font=dict(size=8, color="#333"),
-                                    xref="x", yref="y")
-            # Company label below circle
-            for ci, cl in enumerate(company.split("\n")):
-                _fig_sb2.add_annotation(x=sc_x, y=row_y-0.60 - ci*0.22, text=cl,
-                                        showarrow=False, font=dict(size=7.5, color="#444"),
-                                        xref="x", yref="y")
-
-    # ── Horizontal dashed lines from process box to each SC column ───────────
-    for row_y in _SHOWN_ROWS:
-        _fig_sb2.add_trace(_go_sb.Scatter(
-            x=[3.5, _SC_X[0]-0.38], y=[row_y, row_y], mode="lines",
-            line=dict(color="#bbb", width=0.8, dash="dot"), hoverinfo="skip"
-        ))
-
-    # ── T legend ─────────────────────────────────────────────────────────────
-    _fig_sb2.add_shape(type="circle", x0=4.1, y0=0.4, x1=4.6, y1=0.9,
-                       fillcolor="white", line_color="#555", line_width=1.2)
-    _fig_sb2.add_annotation(x=4.35, y=0.65, text="<b>T</b>", showarrow=False,
-                            font=dict(size=9, color="#333"), xref="x", yref="y")
-    _fig_sb2.add_annotation(x=6.5, y=0.65,
-                            text="<i>Transportation of intermediate products</i>",
-                            showarrow=False, font=dict(size=9, color="#444"), xref="x", yref="y")
-
-    st.plotly_chart(_fig_sb2, use_container_width=True)
-    st.caption("Fig. 1 — System boundary (Hanna & Anctil, 2025). SC-1: China · SC-2: Canada · SC-3: Japan/Chile · SC-4: USA. All scenarios converge at First Solar (USA) for CdTe PV production.")
+    st.plotly_chart(_fig_sb, use_container_width=True, config={"staticPlot": True})
+    st.caption(
+        "Fig. 1 — System boundary from copper mining to CdTe solar panel production, "
+        "redrawn from Hanna & Anctil (2025). Shaded boxes = processes, white boxes = products, "
+        "T = transportation of intermediate products, SG = semiconductor grade."
+    )
 
     st.divider()
 

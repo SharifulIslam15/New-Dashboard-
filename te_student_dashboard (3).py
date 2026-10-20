@@ -452,7 +452,7 @@ elif page == "⛏️ Material Supply":
     formula_box(
         "Direct Mining Supply (year n)",
         "Te_mine(n) = Current_Production × (1 + Growth_Rate/100) ^ n",
-        "100 t × (1 + 0.05)^1 = 105 t",
+        "100 t × (1 + 0.05)^1 = 105.00 t",
     )
 
     col1, col2 = st.columns(2)
@@ -482,7 +482,7 @@ elif page == "⛏️ Material Supply":
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
         f"Mining supply in year 1 ({st.session_state['start_year'] + 1}): "
-        f"<b>{preview_mine:.1f} tonnes</b></div>",
+        f"<b>{preview_mine:.2f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -500,7 +500,7 @@ elif page == "⛏️ Material Supply":
     formula_box(
         "By-production Supply",
         "Te_byp = Copper_Anode (t) × Te_Content (ppm) × 10⁻⁶ × Yield (%/100)",
-        f"29,000,000 t × 110×10⁻⁶ × 0.50 = 1,595 t",
+        f"29,000,000 t × 110×10⁻⁶ × 0.50 = 1,595.00 t",
     )
 
     bp_cu   = st.session_state["bp_copper_anode"]
@@ -509,10 +509,10 @@ elif page == "⛏️ Material Supply":
     bp_supply = bp_cu * 1e6 * bp_ppm * 1e-6 * (bp_yld / 100)
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Copper anode production", f"{bp_cu:.0f} M t/yr")
-    c2.metric("Te content in anode", f"{bp_ppm:.0f} ppm")
-    c3.metric("Recovery yield", f"{bp_yld:.0f}%")
-    c4.metric("By-production supply", f"{bp_supply:,.0f} t/yr")
+    c1.metric("Copper anode production", f"{bp_cu:.2f} M t/yr")
+    c2.metric("Te content in anode", f"{bp_ppm:.2f} ppm")
+    c3.metric("Recovery yield", f"{bp_yld:.2f}%")
+    c4.metric("By-production supply", f"{bp_supply:,.2f} t/yr")
 
     info_box("By-production parameters are fixed at lecture defaults. "
              "This reflects that Te supply is largely controlled by <b>copper production</b>, "
@@ -543,7 +543,7 @@ elif page == "☀️ Material Demand":
     formula_box(
         "Annual PV Demand for Te",
         "Te_PV = PV_Production (GWp) × CdTe_Market_Share (%) / 100 × Te_Intensity (kg/GWp) / 1000",
-        "626.71 × 0.0727 × 24800/1000 = 1,129 t",
+        "626.71 × 0.0727 × 24800/1000 = 1,129.93 t",
     )
 
     col1, col2 = st.columns(2)
@@ -600,7 +600,7 @@ elif page == "☀️ Material Demand":
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
         f"PV demand in start year ({st.session_state['start_year']}): "
-        f"<b>{pv_dem_preview:,.0f} tonnes</b></div>",
+        f"<b>{pv_dem_preview:,.2f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -616,7 +616,7 @@ elif page == "☀️ Material Demand":
     formula_box(
         "Non-PV Demand (year n)",
         "Te_nonPV(n) = Base_Demand × (1 + Growth_Rate/100) ^ n",
-        "455 × (1 + 0.04)^1 = 473.2 t",
+        "455 × (1 + 0.04)^1 = 473.20 t",
     )
 
     col3, col4 = st.columns(2)
@@ -643,7 +643,7 @@ elif page == "☀️ Material Demand":
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
         f"Non-PV demand in year 1 ({st.session_state['start_year'] + 1}): "
-        f"<b>{npv_preview:,.1f} tonnes</b></div>",
+        f"<b>{npv_preview:,.2f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -733,11 +733,11 @@ elif page == "📊 Results & Gap":
         )
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Supply (start yr)", f"{total_supply[0]:,.0f} t")
-    m2.metric("Demand (start yr)", f"{total_demand[0]:,.0f} t")
+    m1.metric("Supply (start yr)", f"{total_supply[0]:,.2f} t")
+    m2.metric("Demand (start yr)", f"{total_demand[0]:,.2f} t")
     gap0 = gap[0]
-    m3.metric("Gap (start yr)", f"{gap0:+,.0f} t", delta="Surplus" if gap0 >= 0 else "Shortage")
-    m4.metric("Gap (end yr)", f"{gap[-1]:+,.0f} t", delta="Surplus" if gap[-1] >= 0 else "Shortage")
+    m3.metric("Gap (start yr)", f"{gap0:+,.2f} t", delta="Surplus" if gap0 >= 0 else "Shortage")
+    m4.metric("Gap (end yr)", f"{gap[-1]:+,.2f} t", delta="Surplus" if gap[-1] >= 0 else "Shortage")
 
     st.divider()
 
@@ -745,16 +745,16 @@ elif page == "📊 Results & Gap":
     st.subheader("Year-by-year Results")
     df = pd.DataFrame({
         "Year": years,
-        "Mining (t)": [round(v, 1) for v in mining],
-        "By-production (t)": [round(v, 1) for v in byproduct],
-        "Recycling (t)": [round(v, 1) for v in recycling],
-        "Total Supply (t)": [round(v, 1) for v in total_supply],
-        "PV Demand (t)": [round(v, 1) for v in pv_demand],
-        "Non-PV Demand (t)": [round(v, 1) for v in nonpv_demand],
-        "Total Demand (t)": [round(v, 1) for v in total_demand],
-        "Gap (t)": [round(v, 1) for v in gap],
+        "Mining (t)": [round(v, 2) for v in mining],
+        "By-production (t)": [round(v, 2) for v in byproduct],
+        "Recycling (t)": [round(v, 2) for v in recycling],
+        "Total Supply (t)": [round(v, 2) for v in total_supply],
+        "PV Demand (t)": [round(v, 2) for v in pv_demand],
+        "Non-PV Demand (t)": [round(v, 2) for v in nonpv_demand],
+        "Total Demand (t)": [round(v, 2) for v in total_demand],
+        "Gap (t)": [round(v, 2) for v in gap],
     })
-    st.dataframe(df.set_index("Year"), use_container_width=True)
+    st.dataframe(df.set_index("Year").style.format("{:,.2f}"), use_container_width=True)
 
     # ── Charts ────────────────────────────────────────────────────────────────
     st.divider()
@@ -785,7 +785,7 @@ elif page == "📊 Results & Gap":
         )
         fig1.update_xaxes(showline=True, mirror=True, ticks="outside",
                           tickmode="array", tickvals=years)
-        fig1.update_yaxes(showline=True, mirror=True, ticks="outside")
+        fig1.update_yaxes(showline=True, mirror=True, ticks="outside", hoverformat=",.2f")
         st.plotly_chart(fig1, use_container_width=True)
 
     with tab2:
@@ -806,7 +806,7 @@ elif page == "📊 Results & Gap":
         )
         fig2.update_xaxes(showline=True, mirror=True, ticks="outside",
                           tickmode="array", tickvals=years)
-        fig2.update_yaxes(showline=True, mirror=True, ticks="outside")
+        fig2.update_yaxes(showline=True, mirror=True, ticks="outside", hoverformat=",.2f")
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab3:
@@ -822,7 +822,8 @@ elif page == "📊 Results & Gap":
         )
         fig3.update_xaxes(showline=True, mirror=True, ticks="outside",
                           tickmode="array", tickvals=years)
-        fig3.update_yaxes(showline=True, mirror=True, ticks="outside", zeroline=True)
+        fig3.update_yaxes(showline=True, mirror=True, ticks="outside", zeroline=True,
+                          hoverformat=",.2f")
         st.plotly_chart(fig3, use_container_width=True)
         st.markdown(
             "<p style='font-size:13px;color:#555;'>Green bars = surplus (supply > demand) &nbsp;|&nbsp; "
@@ -838,7 +839,7 @@ elif page == "📊 Results & Gap":
         st.markdown(
             f"<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
             f"padding:14px 18px;border-radius:8px;'>"
-            f"<b style='color:#1b5e20;'>Surplus in final year ({ey}): +{final_gap:,.0f} tonnes</b><br>"
+            f"<b style='color:#1b5e20;'>Surplus in final year ({ey}): +{final_gap:,.2f} tonnes</b><br>"
             f"<span style='font-size:13px;'>Supply exceeds demand under your scenario. "
             f"Global stocks would be building up.</span></div>",
             unsafe_allow_html=True,
@@ -847,7 +848,7 @@ elif page == "📊 Results & Gap":
         st.markdown(
             f"<div style='background:#fff3e0;border-left:5px solid #e65100;"
             f"padding:14px 18px;border-radius:8px;'>"
-            f"<b style='color:#bf360c;'>Shortage in final year ({ey}): {final_gap:,.0f} tonnes</b><br>"
+            f"<b style='color:#bf360c;'>Shortage in final year ({ey}): {final_gap:,.2f} tonnes</b><br>"
             f"<span style='font-size:13px;'>Demand exceeds supply. Circular Economy strategies "
             f"(recycling) could help close this gap — explore the <b>Circular Economy</b> page.</span></div>",
             unsafe_allow_html=True,
@@ -855,7 +856,7 @@ elif page == "📊 Results & Gap":
 
     # ── Download ──────────────────────────────────────────────────────────────
     st.divider()
-    csv_data = df.to_csv(index=False)
+    csv_data = df.to_csv(index=False, float_format="%.2f")
     fname = f"Te_gap_{st.session_state['student_name'].replace(' ','_')}_{sy}_{ey}.csv"
     st.download_button(
         label="Download results as CSV",
@@ -902,7 +903,7 @@ elif page == "♻️ Circular Economy":
     formula_box(
         "Recycled Te from retired panels (year n)",
         "Te_rec(n) = Base_Retired × (1 + Growth/100)^n × 1000 × Te_Intensity × Eff × Collection × Rate / 1000",
-        "10 GWp × (1.05)^1 × 1000 × 67 × 0.90 × 0.85 × 1.00 / 1000 = 538.2 t in year 1",
+        "10 GWp × (1.05)^1 × 1000 × 67 × 0.90 × 0.85 × 1.00 / 1000 = 538.18 t in year 1",
     )
 
     col1, col2 = st.columns(2)
@@ -961,16 +962,16 @@ elif page == "♻️ Circular Economy":
     import pandas as _pd_ce
     _rec_df = _pd_ce.DataFrame({
         "Year": list(range(_sy_ce, _ey_ce + 1)),
-        "Retired PV (GWp)": [round(rec_ret*(1+rec_ret_gr/100)**i, 1) for i in range(_n_ce)],
-        "Recycled Te (t)":  [round(v, 1) for v in rec_by_year],
+        "Retired PV (GWp)": [round(rec_ret*(1+rec_ret_gr/100)**i, 2) for i in range(_n_ce)],
+        "Recycled Te (t)":  [round(v, 2) for v in rec_by_year],
     })
-    st.dataframe(_rec_df.set_index("Year"), use_container_width=True)
+    st.dataframe(_rec_df.set_index("Year").style.format("{:,.2f}"), use_container_width=True)
 
     st.markdown(
         f"<div style='background:#e8f5e9;border:2px solid #2e7d32;border-radius:8px;"
         f"padding:14px 18px;margin:12px 0;font-size:15px;text-align:center;'>"
-        f"<b>Recycled Te: {rec_supply:,.1f} t in {_sy_ce} → "
-        f"{rec_by_year[-1]:,.1f} t in {_ey_ce}</b></div>",
+        f"<b>Recycled Te: {rec_supply:,.2f} t in {_sy_ce} → "
+        f"{rec_by_year[-1]:,.2f} t in {_ey_ce}</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -1048,14 +1049,14 @@ elif page == "♻️ Circular Economy":
     )
     fig_ce.update_xaxes(showline=True, mirror=True, ticks="outside",
                         tickmode="array", tickvals=years)
-    fig_ce.update_yaxes(showline=True, mirror=True, ticks="outside")
+    fig_ce.update_yaxes(showline=True, mirror=True, ticks="outside", hoverformat=",.2f")
     st.plotly_chart(fig_ce, use_container_width=True)
 
     diff = rec_supply * n_yrs
     st.markdown(
         f"<p style='font-size:13px;color:#555;'>"
-        f"With these settings, recycling grows from <b>{rec_by_year[0]:,.1f} t</b> "
-        f"in year 1 to <b>{rec_by_year[-1]:,.1f} t</b> by {_ey_ce}, "
+        f"With these settings, recycling grows from <b>{rec_by_year[0]:,.2f} t</b> "
+        f"in year 1 to <b>{rec_by_year[-1]:,.2f} t</b> by {_ey_ce}, "
         f"improving the supply–demand gap each year.</p>",
         unsafe_allow_html=True,
     )
@@ -1296,20 +1297,20 @@ elif page == "🌍 LCA of CdTe Solar":
     _fig_method.add_trace(_go_lca.Bar(
         x=_impact_cats, y=_selected_vals,
         marker_color=_bar_colors,
-        text=[f"{v}" for v in _selected_vals],
+        text=[f"{v:.2f}" for v in _selected_vals],
         textposition="outside",
         name="Selected method",
     ))
     _fig_method.add_trace(_go_lca.Bar(
         x=_impact_cats, y=_baseline_vals,
         marker_color=["rgba(150,150,150,0.35)"] * 4,
-        text=[f"{v}" for v in _baseline_vals],
+        text=[f"{v:.2f}" for v in _baseline_vals],
         textposition="outside",
         name="Other method",
     ))
     _fig_method.update_layout(
         barmode="group",
-        yaxis=dict(title="Relative impact (HPM baseline = 100)", range=[0, 175]),
+        yaxis=dict(title="Relative impact (HPM baseline = 100)", range=[0, 175], hoverformat=".2f"),
         xaxis=dict(title="Impact category"),
         legend=dict(orientation="h", y=1.1),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
@@ -1376,13 +1377,13 @@ elif page == "🌍 LCA of CdTe Solar":
     _fig_loc.add_trace(_go_lca.Bar(
         x=_loc_cats, y=_loc_scores,
         marker_color=_loc_colors,
-        text=[f"{v}" for v in _loc_scores],
+        text=[f"{v:.2f}" for v in _loc_scores],
         textposition="outside",
     ))
     _fig_loc.add_hline(y=50, line_dash="dot", line_color="#888",
                        annotation_text="50 — midpoint", annotation_position="right")
     _fig_loc.update_layout(
-        yaxis=dict(title="Relative impact (worst case = 100)", range=[0, 120]),
+        yaxis=dict(title="Relative impact (worst case = 100)", range=[0, 120], hoverformat=".2f"),
         xaxis=dict(title="Impact category"),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
         font=dict(color="#1b5e20"),
@@ -1504,36 +1505,36 @@ elif page == "🌍 LCA of CdTe Solar":
     _co2_m1, _co2_m2, _co2_m3 = st.columns(3)
     _co2_m1.metric(
         "Te GWP intensity",
-        f"{_gwp_te:.1f} kg CO₂/kg Te",
+        f"{_gwp_te:.2f} kg CO₂/kg Te",
         help="Carbon footprint per kg of semiconductor-grade Te produced",
     )
     _co2_m2.metric(
         f"Total CO₂ from Te supply ({_co2_sy}–{_co2_ey})",
-        f"{_co2_kg_co2/1e6:.2f} Mt CO₂",
+        f"{_co2_kg_co2/1e6:,.2f} kt CO₂",
         help="Cumulative carbon footprint of all Te supplied over your study period",
     )
     _co2_m3.metric(
         f"CO₂ impact of gap in {_co2_ey}",
-        f"{_co2_gap_impact/1e9:.4f} Mt CO₂",
+        f"{_co2_gap_impact/1e6:,.2f} kt CO₂",
         delta="surplus saves this CO₂" if _co2_gap_end >= 0 else "shortage needs this CO₂",
         help="Carbon cost of the supply–demand gap in the final year",
     )
 
     # Year-by-year CO2 chart
-    _co2_yearly = [s * 1000 * _gwp_te / 1e6 for s in _co2_sup]  # Mt CO2 per year
+    _co2_yearly = [s * 1000 * _gwp_te / 1e6 for s in _co2_sup]  # kt CO2 per year
     _fig_co2 = _go_lca.Figure()
     _fig_co2.add_trace(_go_lca.Bar(
         x=list(range(_co2_sy, _co2_ey + 1)),
         y=_co2_yearly,
         name="CO₂ from Te supply",
         marker_color="#c62828",
-        text=[f"{v:.3f}" for v in _co2_yearly],
+        text=[f"{v:,.2f}" for v in _co2_yearly],
         textposition="outside",
     ))
     _fig_co2.update_layout(
         xaxis=dict(title="Year", tickmode="array",
                    tickvals=list(range(_co2_sy, _co2_ey + 1))),
-        yaxis=dict(title="Mt CO₂-eq per year"),
+        yaxis=dict(title="kt CO₂-eq per year", hoverformat=",.2f"),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
         font=dict(color="#1b5e20"),
         margin=dict(t=20, b=10), height=280, showlegend=False,
@@ -1544,10 +1545,10 @@ elif page == "🌍 LCA of CdTe Solar":
         f"<div style='background:#f1f8e9;border-left:4px solid #2e7d32;padding:10px 14px;"
         f"border-radius:6px;font-size:13px;'>"
         f"<b>Connection to your supply gap:</b> Your scenario shows a gap of "
-        f"<b>{_co2_gap_end:+,.0f} t</b> in {_co2_ey}. "
-        f"At {_gwp_te:.1f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
+        f"<b>{_co2_gap_end:+,.2f} t</b> in {_co2_ey}. "
+        f"At {_gwp_te:.2f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
         f"sourcing that Te would produce "
-        f"<b>{_co2_gap_impact/1e9:.4f} Mt CO₂</b>. "
+        f"<b>{_co2_gap_impact/1e6:,.2f} kt CO₂</b>. "
         f"Switching to a lower-GWP location or method directly reduces this burden.</div>",
         unsafe_allow_html=True,
     )
@@ -1655,9 +1656,9 @@ elif page == "🔍 Scenario Analysis":
     # Summary cards
     _sc1, _sc2, _sc3, _sc4 = st.columns(4)
     _sc1.metric("Study period", f"{_sy} – {_ey}")
-    _sc2.metric(f"Gap in {_sy}", f"{_gap_start:+,.0f} t")
-    _sc3.metric(f"Gap in {_ey}", f"{_gap_end:+,.0f} t", delta=_gap_trend)
-    _sc4.metric("Recycling supply", f"{_rec_supply:,.1f} t/yr")
+    _sc2.metric(f"Gap in {_sy}", f"{_gap_start:+,.2f} t")
+    _sc3.metric(f"Gap in {_ey}", f"{_gap_end:+,.2f} t", delta=_gap_trend)
+    _sc4.metric("Recycling supply", f"{_rec_supply:,.2f} t/yr")
 
     # Mini sparkline chart
     import plotly.graph_objects as _go_pb
@@ -1682,7 +1683,7 @@ elif page == "🔍 Scenario Analysis":
         font=dict(size=11, color="#1b5e20"),
         legend=dict(orientation="h", y=1.12),
         xaxis=dict(tickmode="array", tickvals=_yrs),
-        yaxis=dict(title="Tonnes"),
+        yaxis=dict(title="Tonnes", hoverformat=",.2f"),
     )
     st.plotly_chart(_fig_spark, use_container_width=True)
 
@@ -1740,8 +1741,8 @@ elif page == "🔍 Scenario Analysis":
     st.markdown(
         "<p style='font-size:13px;color:#555;'>"
         "Your Results page shows a supply–demand gap of "
-        f"<b>{_gap_end:+,.0f} tonnes in {_ey}</b>. "
-        "Your recycling setting adds <b>{:.1f} tonnes/yr</b>. ".format(_rec_supply) +
+        f"<b>{_gap_end:+,.2f} tonnes in {_ey}</b>. "
+        "Your recycling setting adds <b>{:.2f} tonnes/yr</b>. ".format(_rec_supply) +
         "Is recycling alone sufficient to close this gap? "
         "What combination of CE strategies (collection rate, recycling efficiency, "
         "material intensity reduction) would you recommend, and why?</p>",
@@ -1834,9 +1835,9 @@ Date    : Generated from Material Availability Dashboard
 
 SCENARIO SUMMARY
 {'─'*40}
-Gap in {_sy}  : {_gap_start:+,.1f} tonnes
-Gap in {_ey}  : {_gap_end:+,.1f} tonnes  ({_gap_trend})
-Recycling     : {_rec_supply:,.1f} tonnes/yr
+Gap in {_sy}  : {_gap_start:+,.2f} tonnes
+Gap in {_ey}  : {_gap_end:+,.2f} tonnes  ({_gap_trend})
+Recycling     : {_rec_supply:,.2f} tonnes/yr
 
 QUESTION 1 — SOURCING STRATEGY
 {'─'*40}
@@ -2026,10 +2027,10 @@ elif page == "⚠️ Circularity Reality Check":
     _fig_stress = _go_crc.Figure()
     _colors = ["#2e7d32", "#1565c0", "#e65100", "#c62828"]
     _labels = [
-        f"Your settings ({_col*100:.0f}% collection, {_lifetime}-yr life, {_ti_base:.0f} kg/MWp)",
+        f"Your settings ({_col*100:.2f}% collection, {_lifetime}-yr life, {_ti_base:.2f} kg/MWp)",
         f"Long lifetime ({_lifetime}-yr → delayed retirement wave)",
         f"Thin film ({_ti_scenario.split('(')[1].rstrip(')')})",
-        f"Low collection ({_col_stress:.0f}% — current US reality)",
+        f"Low collection ({_col_stress:.2f}% — current US reality)",
     ]
     _scenarios = [_rec_base, _rec_s1, _rec_s2, _rec_s3]
 
@@ -2043,7 +2044,7 @@ elif page == "⚠️ Circularity Reality Check":
 
     _fig_stress.update_layout(
         xaxis=dict(title="Year", tickmode="array", tickvals=_yrs),
-        yaxis=dict(title="Recycled Te (tonnes/yr)"),
+        yaxis=dict(title="Recycled Te (tonnes/yr)", hoverformat=",.2f"),
         legend=dict(orientation="h", y=-0.35, font=dict(size=10)),
         plot_bgcolor="#f9fbe7", paper_bgcolor="#e8f5e9",
         font=dict(color="#1b5e20"),
@@ -2063,17 +2064,20 @@ elif page == "⚠️ Circularity Reality Check":
             "Your settings (base)",
             f"Long lifetime ({_lifetime} yrs)",
             f"Thin film ({_ti_scenario.split('(')[0].strip()})",
-            f"Low collection ({_col_stress:.0f}%)",
+            f"Low collection ({_col_stress:.2f}%)",
         ],
-        f"Recycled Te in {_ey} (t)": [round(v, 1) for v in _end_vals],
+        f"Recycled Te in {_ey} (t)": [round(v, 2) for v in _end_vals],
         "Change vs. base": [
             "—",
-            f"{_pct_change[1]:+.0f}%",
-            f"{_pct_change[2]:+.0f}%",
-            f"{_pct_change[3]:+.0f}%",
+            f"{_pct_change[1]:+.2f}%",
+            f"{_pct_change[2]:+.2f}%",
+            f"{_pct_change[3]:+.2f}%",
         ],
     })
-    st.dataframe(_stress_df.set_index("Scenario"), use_container_width=True)
+    st.dataframe(
+        _stress_df.set_index("Scenario").style.format({f"Recycled Te in {_ey} (t)": "{:,.2f}"}),
+        use_container_width=True,
+    )
 
     # ── Reflection prompt ──────────────────────────────────────────────────────
     _worst = min(_end_vals[1], _end_vals[2], _end_vals[3])
@@ -2082,9 +2086,9 @@ elif page == "⚠️ Circularity Reality Check":
         f"<div style='background:#fff8e1;border-left:5px solid #f57f17;"
         f"padding:12px 16px;border-radius:6px;font-size:13px;margin-top:8px;'>"
         f"<b>Think about this:</b> Your optimistic recycling scenario recovers "
-        f"<b>{_best:,.1f} t/yr</b> by {_ey}. "
-        f"Under the most stressed condition, that drops to <b>{_worst:,.1f} t/yr</b> — "
-        f"a reduction of <b>{(1 - _worst/max(_best,0.001))*100:.0f}%</b>. "
+        f"<b>{_best:,.2f} t/yr</b> by {_ey}. "
+        f"Under the most stressed condition, that drops to <b>{_worst:,.2f} t/yr</b> — "
+        f"a reduction of <b>{(1 - _worst/max(_best,0.001))*100:.2f}%</b>. "
         f"Does your supply strategy still work at that level?</div>",
         unsafe_allow_html=True,
     )
@@ -2251,12 +2255,12 @@ elif page == "⚠️ Circularity Reality Check":
     _cd_at_risk    = _cd_not_col * 0.62  # 62% leaching rate
 
     _cd1, _cd2, _cd3 = st.columns(3)
-    _cd1.metric("Retired PV (base yr)", f"{_total_ret_gwp:.0f} GWp",
+    _cd1.metric("Retired PV (base yr)", f"{_total_ret_gwp:.2f} GWp",
                 help="From your CE page settings")
-    _cd2.metric("Cd NOT collected", f"{_cd_not_col:,.1f} t",
-                help=f"At {_col_rate_cd:.0f}% collection, {100-_col_rate_cd:.0f}% of panels go to landfill")
-    _cd3.metric("Cd at risk of leaching", f"{_cd_at_risk:,.1f} t",
-                delta=f"{_cd_at_risk:,.1f} t into water (360 days)",
+    _cd2.metric("Cd NOT collected", f"{_cd_not_col:,.2f} t",
+                help=f"At {_col_rate_cd:.2f}% collection, {100-_col_rate_cd:.2f}% of panels go to landfill")
+    _cd3.metric("Cd at risk of leaching", f"{_cd_at_risk:,.2f} t",
+                delta=f"{_cd_at_risk:,.2f} t into water (360 days)",
                 delta_color="inverse",
                 help="62% of Cd in landfilled CdTe panels leaches into water within 360 days")
 
@@ -2266,7 +2270,9 @@ elif page == "⚠️ Circularity Reality Check":
         values=[_col_rate_cd, 100 - _col_rate_cd],
         hole=0.55,
         marker_colors=["#2e7d32", "#c62828"],
-        textinfo="label+percent",
+        text=[f"{_col_rate_cd:.2f}%", f"{100 - _col_rate_cd:.2f}%"],
+        textinfo="label+text",
+        hovertemplate="%{label}<br>%{text}<extra></extra>",
         textfont=dict(size=12),
     )])
     _fig_cd.update_layout(
@@ -2275,7 +2281,7 @@ elif page == "⚠️ Circularity Reality Check":
         margin=dict(t=10, b=10),
         height=280,
         showlegend=False,
-        annotations=[dict(text=f"{_col_rate_cd:.0f}%<br>collected",
+        annotations=[dict(text=f"{_col_rate_cd:.2f}%<br>collected",
                           x=0.5, y=0.5, font_size=14, showarrow=False,
                           font_color="#2e7d32")],
     )
@@ -2381,7 +2387,7 @@ elif page == "⚠️ Circularity Reality Check":
     ))
     _fig_radar.update_layout(
         polar=dict(
-            radialaxis=dict(visible=True, range=[0, 100],
+            radialaxis=dict(visible=True, range=[0, 100], hoverformat=".2f",
                             ticksuffix="%", tickfont=dict(size=10)),
             bgcolor="#f9fbe7",
         ),

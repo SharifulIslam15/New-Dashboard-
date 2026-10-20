@@ -248,6 +248,7 @@ elif page == "👤 Student Info":
     st.header("Student Information", divider="grey")
     info_box("Fill in your details and choose your study period. Press <b>Save</b> to continue.")
 
+    st.subheader("Your details")
     col1, col2 = st.columns(2)
     with col1:
         name = st.text_input(
@@ -255,12 +256,17 @@ elif page == "👤 Student Info":
             value=st.session_state["student_name"],
             help="Enter your full name as it appears on your course roster.",
         )
+    with col2:
         sid = st.text_input(
             "Student ID",
             value=st.session_state["student_id"],
             help="Optional — your MSU or course student ID.",
         )
-    with col2:
+
+    st.divider()
+    st.subheader("Study period")
+    col3, col4 = st.columns(2)
+    with col3:
         sy = st.number_input(
             "Study start year *",
             min_value=2024,
@@ -269,6 +275,7 @@ elif page == "👤 Student Info":
             value=st.session_state["start_year"],
             help="First year of your analysis (e.g. 2025).",
         )
+    with col4:
         ey = st.number_input(
             "Study end year *",
             min_value=2025,

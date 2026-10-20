@@ -163,7 +163,7 @@ if page == "🏠 Welcome":
     with col_a:
         st.markdown(
             "<h1 style='color:#1b5e20;font-size:32px;margin-bottom:4px;'>"
-            "🌞 Material Availability Dashboard</h1>"
+            "Material Availability Dashboard</h1>"
             "<h3 style='color:#388e3c;font-weight:400;margin-top:0;'>"
             "Tellurium (Te) for CdTe Solar</h3>",
             unsafe_allow_html=True,
@@ -197,7 +197,7 @@ if page == "🏠 Welcome":
                 unsafe_allow_html=True,
             )
 
-        info_box("⚠️ <b>Tip:</b> Complete the pages <i>in order</i> using the sidebar. "
+        info_box("<b>Tip:</b> Complete the pages <i>in order</i> using the sidebar. "
                  "Enter your name on <b>Student Info</b> first.")
 
     with col_b:
@@ -216,7 +216,7 @@ if page == "🏠 Welcome":
         "<div style='background:#2e7d32;padding:16px 24px;border-radius:10px;"
         "text-align:center;margin-top:20px;'>"
         "<p style='color:white;font-size:15px;font-weight:700;margin:0;'>"
-        "🚀 Ready? Select <b>Student Info</b> in the sidebar to begin →</p></div>",
+        "Ready? Select <b>Student Info</b> in the sidebar to begin →</p></div>",
         unsafe_allow_html=True,
     )
 
@@ -265,10 +265,10 @@ elif page == "👤 Student Info":
     c3.metric("Te in copper anode", "~110 ppm", help="Typical concentration")
     c4.metric("Non-PV Te demand", "~455 t (2024)", help="Electronics, alloys, etc.")
 
-    info_box("💡 <b>Hitchhiker resource:</b> Te is mainly produced as a <i>byproduct of copper "
+    info_box("<b>Hitchhiker resource:</b> Te is mainly produced as a <i>byproduct of copper "
              "electrorefining</i> — its supply is tied to copper production, not to Te demand directly.")
 
-    if st.button("💾 Save and continue →"):
+    if st.button("Save and continue →"):
         if name.strip() == "":
             st.error("Please enter your name before saving.")
         elif ey <= sy:
@@ -298,7 +298,7 @@ elif page == "🔗 Hitchhiker Concept":
     st.markdown(
         "<div style='background:#1b5e20;padding:18px 24px;border-radius:10px;margin-bottom:16px;'>"
         "<p style='color:#fff;font-size:16px;font-weight:700;margin:0 0 8px 0;'>"
-        "🔗 What is a Hitchhiker Resource?</p>"
+        "What is a Hitchhiker Resource?</p>"
         "<p style='color:#e8f5e9;font-size:14px;line-height:1.8;margin:0;'>"
         "A <b>hitchhiker (or co-occurring) resource</b> is one whose access may be either "
         "<i>diminished or enhanced</i> by a change in the production of some <b>other commodity</b>. "
@@ -322,7 +322,6 @@ elif page == "🔗 Hitchhiker Concept":
         st.markdown(
             "<div style='background:#fff8e1;border:2px solid #f9a825;border-radius:10px;"
             "padding:16px;min-height:280px;'>"
-            "<div style='font-size:36px;text-align:center;'>🟠</div>"
             "<h4 style='color:#e65100;text-align:center;margin:8px 0;'>Copper (Cu)</h4>"
             "<p style='font-size:13px;line-height:1.8;color:#333;'>"
             "<b>Primary host.</b> Copper electrorefining is the <b>dominant source</b> of Te globally. "
@@ -331,8 +330,8 @@ elif page == "🔗 Hitchhiker Concept":
             "from which it can be extracted.</p>"
             "<div style='background:#fff3cd;border-radius:6px;padding:8px 12px;margin-top:10px;'>"
             "<p style='font-size:12px;margin:0;color:#856404;'>"
-            "⚡ Typical Te content: <b>~110 ppm</b> in copper anode<br>"
-            "🏭 Accounts for <b>~75–80%</b> of world Te supply"
+            "Typical Te content: <b>~110 ppm</b> in copper anode<br>"
+            "Accounts for <b>~75–80%</b> of world Te supply"
             "</p></div></div>",
             unsafe_allow_html=True,
         )
@@ -341,7 +340,6 @@ elif page == "🔗 Hitchhiker Concept":
         st.markdown(
             "<div style='background:#e8eaf6;border:2px solid #3949ab;border-radius:10px;"
             "padding:16px;min-height:280px;'>"
-            "<div style='font-size:36px;text-align:center;'>⚫</div>"
             "<h4 style='color:#1a237e;text-align:center;margin:8px 0;'>Nickel (Ni)</h4>"
             "<p style='font-size:13px;line-height:1.8;color:#333;'>"
             "<b>Secondary host.</b> Some nickel ores also contain tellurium. "
@@ -350,8 +348,8 @@ elif page == "🔗 Hitchhiker Concept":
             "total available supply, especially in Canada and Russia.</p>"
             "<div style='background:#c5cae9;border-radius:6px;padding:8px 12px;margin-top:10px;'>"
             "<p style='font-size:12px;margin:0;color:#1a237e;'>"
-            "🌍 Notable regions: <b>Canada, Russia, South Africa</b><br>"
-            "📊 Accounts for <b>~5–15%</b> of world Te supply"
+            "Notable regions: <b>Canada, Russia, South Africa</b><br>"
+            "Accounts for <b>~5–15%</b> of world Te supply"
             "</p></div></div>",
             unsafe_allow_html=True,
         )
@@ -437,7 +435,7 @@ elif page == "🔗 Hitchhiker Concept":
     # Key constraint label
     _fig_hh.add_annotation(
         x=5.75, y=3.5,
-        text="⚠️  Te supply is controlled by Cu & Ni output, not by Te demand",
+        text="Te supply is controlled by Cu & Ni output, not by Te demand",
         showarrow=False, font=dict(size=11, color="#c62828"),
         bgcolor="#ffebee", bordercolor="#c62828", borderwidth=1,
     )
@@ -495,7 +493,7 @@ elif page == "⛏️ Material Supply":
     preview_mine = mine_base * (1 + mine_gr / 100)
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
-        f"📌 Mining supply in year 1 ({st.session_state['start_year'] + 1}): "
+        f"Mining supply in year 1 ({st.session_state['start_year'] + 1}): "
         f"<b>{preview_mine:.1f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
@@ -528,12 +526,12 @@ elif page == "⛏️ Material Supply":
     c3.metric("Recovery yield", f"{bp_yld:.0f}%")
     c4.metric("By-production supply", f"{bp_supply:,.0f} t/yr")
 
-    info_box("🔒 By-production parameters are fixed at lecture defaults. "
+    info_box("By-production parameters are fixed at lecture defaults. "
              "This reflects that Te supply is largely controlled by <b>copper production</b>, "
              "not by Te-specific demand.")
 
     st.divider()
-    if st.button("💾 Save supply inputs →"):
+    if st.button("Save supply inputs →"):
         st.session_state["mine_base_production"] = mine_base
         st.session_state["mine_growth_rate"] = mine_gr
         st.session_state["calculated"] = False
@@ -613,7 +611,7 @@ elif page == "☀️ Material Demand":
     pv_dem_preview = pv_prod * (pv_share / 100) * (pv_ti / 1000)
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
-        f"📌 PV demand in start year ({st.session_state['start_year']}): "
+        f"PV demand in start year ({st.session_state['start_year']}): "
         f"<b>{pv_dem_preview:,.0f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
@@ -656,13 +654,13 @@ elif page == "☀️ Material Demand":
     npv_preview = npv_base * (1 + npv_gr / 100)
     st.markdown(
         f"<div style='background:#f1f8e9;padding:8px 14px;border-radius:6px;font-size:13px;'>"
-        f"📌 Non-PV demand in year 1 ({st.session_state['start_year'] + 1}): "
+        f"Non-PV demand in year 1 ({st.session_state['start_year'] + 1}): "
         f"<b>{npv_preview:,.1f} tonnes</b></div>",
         unsafe_allow_html=True,
     )
 
     st.divider()
-    if st.button("💾 Save demand inputs →"):
+    if st.button("Save demand inputs →"):
         st.session_state["pv_production_start"] = pv_prod
         st.session_state["pv_market_share_start"] = pv_share
         st.session_state["pv_te_intensity"] = pv_ti
@@ -774,7 +772,7 @@ elif page == "📊 Results & Gap":
     st.divider()
     st.subheader("Supply vs. Demand")
 
-    tab1, tab2, tab3 = st.tabs(["📈 Supply & Demand Overview", "🔍 Supply Breakdown", "⚖️ Gap Chart"])
+    tab1, tab2, tab3 = st.tabs(["Supply & Demand Overview", "Supply Breakdown", "Gap Chart"])
 
     with tab1:
         fig1 = go.Figure()
@@ -839,8 +837,8 @@ elif page == "📊 Results & Gap":
         fig3.update_yaxes(showline=True, mirror=True, ticks="outside", zeroline=True)
         st.plotly_chart(fig3, use_container_width=True)
         st.markdown(
-            "<p style='font-size:13px;color:#555;'>🟢 Green bars = surplus (supply > demand) &nbsp;|&nbsp; "
-            "🔴 Red bars = shortage (demand > supply)</p>",
+            "<p style='font-size:13px;color:#555;'>Green bars = surplus (supply > demand) &nbsp;|&nbsp; "
+            "Red bars = shortage (demand > supply)</p>",
             unsafe_allow_html=True,
         )
 
@@ -852,7 +850,7 @@ elif page == "📊 Results & Gap":
         st.markdown(
             f"<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
             f"padding:14px 18px;border-radius:8px;'>"
-            f"<b style='color:#1b5e20;'>✅ Surplus in final year ({ey}): +{final_gap:,.0f} tonnes</b><br>"
+            f"<b style='color:#1b5e20;'>Surplus in final year ({ey}): +{final_gap:,.0f} tonnes</b><br>"
             f"<span style='font-size:13px;'>Supply exceeds demand under your scenario. "
             f"Global stocks would be building up.</span></div>",
             unsafe_allow_html=True,
@@ -861,7 +859,7 @@ elif page == "📊 Results & Gap":
         st.markdown(
             f"<div style='background:#fff3e0;border-left:5px solid #e65100;"
             f"padding:14px 18px;border-radius:8px;'>"
-            f"<b style='color:#bf360c;'>⚠️ Shortage in final year ({ey}): {final_gap:,.0f} tonnes</b><br>"
+            f"<b style='color:#bf360c;'>Shortage in final year ({ey}): {final_gap:,.0f} tonnes</b><br>"
             f"<span style='font-size:13px;'>Demand exceeds supply. Circular Economy strategies "
             f"(recycling) could help close this gap — explore the <b>Circular Economy</b> page.</span></div>",
             unsafe_allow_html=True,
@@ -872,7 +870,7 @@ elif page == "📊 Results & Gap":
     csv_data = df.to_csv(index=False)
     fname = f"Te_gap_{st.session_state['student_name'].replace(' ','_')}_{sy}_{ey}.csv"
     st.download_button(
-        label="⬇️ Download results as CSV",
+        label="Download results as CSV",
         data=csv_data,
         file_name=fname,
         mime="text/csv",
@@ -891,21 +889,21 @@ elif page == "♻️ Circular Economy":
     c1, c2, c3 = st.columns(3)
     c1.markdown(
         "<div style='background:#f1f8e9;border-radius:8px;padding:14px;min-height:120px;'>"
-        "<b style='color:#2e7d32;'>♻️ Recycle</b><br>"
+        "<b style='color:#2e7d32;'>Recycle</b><br>"
         "<span style='font-size:13px;'>Recover Te from end-of-life CdTe panels. "
         "~90% recovery efficiency is technically achievable.</span></div>",
         unsafe_allow_html=True,
     )
     c2.markdown(
         "<div style='background:#f1f8e9;border-radius:8px;padding:14px;min-height:120px;'>"
-        "<b style='color:#2e7d32;'>⛏️ Urban Mining</b><br>"
+        "<b style='color:#2e7d32;'>Urban Mining</b><br>"
         "<span style='font-size:13px;'>Recover Te from decommissioned panels and installed PV fleets, "
         "supplementing primary supply as stocks decline.</span></div>",
         unsafe_allow_html=True,
     )
     c3.markdown(
         "<div style='background:#f1f8e9;border-radius:8px;padding:14px;min-height:120px;'>"
-        "<b style='color:#2e7d32;'>🔬 Reduce Intensity</b><br>"
+        "<b style='color:#2e7d32;'>Reduce Intensity</b><br>"
         "<span style='font-size:13px;'>Technology improvements already cut Te intensity from "
         "~100 kg/MWp to ~24 kg/MWp. Further reductions directly cut PV demand.</span></div>",
         unsafe_allow_html=True,
@@ -983,7 +981,7 @@ elif page == "♻️ Circular Economy":
     st.markdown(
         f"<div style='background:#e8f5e9;border:2px solid #2e7d32;border-radius:8px;"
         f"padding:14px 18px;margin:12px 0;font-size:15px;text-align:center;'>"
-        f"♻️ <b>Recycled Te: {rec_supply:,.1f} t in {_sy_ce} → "
+        f"<b>Recycled Te: {rec_supply:,.1f} t in {_sy_ce} → "
         f"{rec_by_year[-1]:,.1f} t in {_ey_ce}</b></div>",
         unsafe_allow_html=True,
     )
@@ -992,7 +990,7 @@ elif page == "♻️ Circular Economy":
     st.divider()
     st.subheader("Impact on the Supply–Demand Gap")
 
-    if st.button("💾 Apply recycling to Results page →"):
+    if st.button("Apply recycling to Results page →"):
         st.session_state["rec_retired_pv"]     = rec_ret
         st.session_state["rec_retired_growth"] = rec_ret_gr
         st.session_state["rec_te_intensity"]   = rec_ti
@@ -1079,7 +1077,7 @@ elif page == "♻️ Circular Economy":
     st.markdown(
         "<div style='background:#1b5e20;padding:18px 24px;border-radius:10px;margin-bottom:12px;'>"
         "<p style='color:#fff;font-size:18px;font-weight:bold;margin:0;'>"
-        "♻️ What is Circular Economy?</p></div>",
+        "What is Circular Economy?</p></div>",
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -1290,7 +1288,7 @@ elif page == "🌍 LCA of CdTe Solar":
 
     _method = st.radio(
         "Select processing method:",
-        ["⚗️ Hydrometallurgy (HM)", "🔥 Hydro-Pyrometallurgy (HPM)"],
+        ["Hydrometallurgy (HM)", "Hydro-Pyrometallurgy (HPM)"],
         horizontal=True,
         key="lca_method",
     )
@@ -1337,7 +1335,7 @@ elif page == "🌍 LCA of CdTe Solar":
         st.markdown(
             "<div style='background:#ffebee;border-left:5px solid #c62828;"
             "padding:12px 16px;border-radius:6px;font-size:13px;'>"
-            "⚗️ <b>Hydrometallurgy</b> uses more chemicals (HCl, H₂O₂, H₂SO₄, dibutyl carbitol) "
+            "<b>Hydrometallurgy</b> uses more chemicals (HCl, H₂O₂, H₂SO₄, dibutyl carbitol) "
             "and recovers Te only at the <i>final</i> reduction step — after bearing the environmental "
             "cost of recovering silver, gold, and selenium first. This leads to "
             "<b>37–51% higher impacts</b> compared to hydro-pyrometallurgy.</div>",
@@ -1347,7 +1345,7 @@ elif page == "🌍 LCA of CdTe Solar":
         st.markdown(
             "<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
             "padding:12px 16px;border-radius:6px;font-size:13px;'>"
-            "🔥 <b>Hydro-Pyrometallurgy</b> recovers tellurium early in the process "
+            "<b>Hydro-Pyrometallurgy</b> recovers tellurium early in the process "
             "(decopperization step), before silver and gold recovery. This means Te "
             "only bears the footprint of the first stage, not all subsequent steps. "
             "This is the method used in the <b>US (Rio Tinto/Kennecott) and Canada (Glencore CCR)</b>.</div>",
@@ -1410,26 +1408,26 @@ elif page == "🌍 LCA of CdTe Solar":
     _loc_insights = {
         "China (CN) — Jiangxi Copper": (
             "#ffebee", "#c62828",
-            "🇨🇳 China has the <b>highest water scarcity footprint</b> — despite using less water than Canada, "
+            "China has the <b>highest water scarcity footprint</b> — despite using less water than Canada, "
             "China's water scarcity characterization factor (CF) is 10× Canada's and 3× the US. "
             "It also leads in freshwater toxicity and abiotic depletion."
         ),
         "Canada (CA) — Glencore CCR": (
             "#e8f5e9", "#2e7d32",
-            "🇨🇦 Canada has the <b>lowest carbon footprint and energy demand</b> thanks to its clean electricity grid. "
+            "Canada has the <b>lowest carbon footprint and energy demand</b> thanks to its clean electricity grid. "
             "However, Canada has the <b>highest freshwater toxicity and ADP</b> — driven by its very high "
             "copper sulfide ore concentration (low copper-to-molybdenum ratio = only 4.36% of mining impacts "
             "allocated to molybdenum, vs. >20% elsewhere)."
         ),
         "Japan (JP) — JX Metals Saganoseki": (
             "#fff8e1", "#e65100",
-            "🇯🇵 Japan (SC3) has the <b>highest carbon footprint of all scenarios</b> because it imports "
+            "Japan (SC3) has the <b>highest carbon footprint of all scenarios</b> because it imports "
             "copper concentrate from Chile — ~20,000 km by sea + 174 km by truck. "
             "Transportation adds significant GWP despite Chile having a cleaner grid."
         ),
         "USA (US) — Rio Tinto Kennecott": (
             "#e3f2fd", "#1565c0",
-            "🇺🇸 The US has the <b>lowest freshwater toxicity and abiotic depletion</b> among all scenarios. "
+            "The US has the <b>lowest freshwater toxicity and abiotic depletion</b> among all scenarios. "
             "This is because the US has the lowest copper concentration and highest molybdenum production "
             "from copper sulfide ores — distributing more environmental burden to molybdenum, less to Te. "
             "The US also benefits from a relatively low-carbon electricity grid."
@@ -1557,7 +1555,7 @@ elif page == "🌍 LCA of CdTe Solar":
     st.markdown(
         f"<div style='background:#f1f8e9;border-left:4px solid #2e7d32;padding:10px 14px;"
         f"border-radius:6px;font-size:13px;'>"
-        f"💡 <b>Connection to your supply gap:</b> Your scenario shows a gap of "
+        f"<b>Connection to your supply gap:</b> Your scenario shows a gap of "
         f"<b>{_co2_gap_end:+,.0f} t</b> in {_co2_ey}. "
         f"At {_gwp_te:.1f} kg CO₂/kg Te ({_co2_loc}, {_co2_method.split()[0]}), "
         f"sourcing that Te would produce "
@@ -1571,24 +1569,23 @@ elif page == "🌍 LCA of CdTe Solar":
     # ── Key takeaways ─────────────────────────────────────────────────────────
     st.subheader("6 — Key Takeaways")
     _takeaways = [
-        ("🌱", "Location matters",
+        ("Location matters",
          "Sourcing and processing anode slimes in Canada or the US reduces carbon footprint and water scarcity — "
          "supporting reshoring and friendshoring strategies."),
-        ("⚗️", "Method matters",
+        ("Method matters",
          "Hydro-pyrometallurgical processing consistently outperforms hydrometallurgy across all "
          "four impact categories. The US and Canada both already use this method."),
-        ("📊", "Carbon footprint depends on where and how Te is produced",
+        ("Carbon footprint depends on where and how Te is produced",
          "The GWP of Te ranges from ~5 kg CO₂/kg (Canada, HPM) to ~34 kg CO₂/kg (Japan, HM). "
          "Your sourcing choice has a direct, calculable impact on total CO₂ emissions."),
-        ("♻️", "Circular Economy reduces the burden",
+        ("Circular Economy reduces the burden",
          "Recycling retired CdTe panels reduces demand for newly mined Te — directly cutting "
          "the upstream environmental impacts shown here."),
     ]
-    for icon, title, desc in _takeaways:
+    for title, desc in _takeaways:
         st.markdown(
             f"<div style='display:flex;align-items:flex-start;gap:14px;"
             f"background:#f1f8e9;border-radius:8px;padding:12px 16px;margin-bottom:8px;'>"
-            f"<div style='font-size:24px;'>{icon}</div>"
             f"<div><b style='color:#1b5e20;font-size:14px;'>{title}</b>"
             f"<p style='font-size:13px;color:#333;margin:4px 0 0 0;line-height:1.6;'>{desc}</p>"
             f"</div></div>",
@@ -1707,7 +1704,7 @@ elif page == "🔍 Scenario Analysis":
     st.markdown(
         "<div style='background:#1b5e20;padding:16px 22px;border-radius:10px;margin-bottom:16px;'>"
         "<p style='color:white;font-size:15px;font-weight:700;margin:0 0 6px 0;'>"
-        "📋 Your Task</p>"
+        "Your Task</p>"
         "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
         "You are an engineering advisor writing a brief for a decision-maker at the US Department of Energy. "
         "Based on your analysis across all pages of this dashboard, answer the five questions below. "
@@ -1826,7 +1823,7 @@ elif page == "🔍 Scenario Analysis":
     # ── Save + generate PDF-ready report ─────────────────────────────────────
     col_btn1, col_btn2 = st.columns([1, 1])
     with col_btn1:
-        if st.button("💾 Save answers"):
+        if st.button("Save answers"):
             st.session_state["pb_sourcing"]       = pb_sourcing
             st.session_state["pb_method"]         = pb_method
             st.session_state["pb_ce"]             = pb_ce
@@ -1882,7 +1879,7 @@ Source: Material Availability Dashboard
 """
         _fname = f"ScenarioAnalysis_{_name.replace(' ','_')}_{_sy}_{_ey}.txt"
         st.download_button(
-            label="⬇️ Download scenario analysis (.txt)",
+            label="Download scenario analysis (.txt)",
             data=_report,
             file_name=_fname,
             mime="text/plain",
@@ -1891,7 +1888,7 @@ Source: Material Availability Dashboard
     st.divider()
 
     # ── Rubric ────────────────────────────────────────────────────────────────
-    with st.expander("📏 View grading rubric"):
+    with st.expander("View grading rubric"):
         st.markdown(
             "<p style='font-size:13px;color:#555;margin-bottom:10px;'>"
             "Each question is worth 4 points. Total = 24 points.</p>",
@@ -1932,7 +1929,7 @@ elif page == "⚠️ Circularity Reality Check":
     st.markdown(
         "<div style='background:#fff3e0;border-left:5px solid #e65100;"
         "padding:14px 18px;border-radius:8px;margin-bottom:16px;'>"
-        "<b style='color:#bf360c;font-size:15px;'>⚠️ Challenge your assumptions</b><br>"
+        "<b style='color:#bf360c;font-size:15px;'>Challenge your assumptions</b><br>"
         "<p style='color:#333;font-size:14px;line-height:1.8;margin:8px 0 0 0;'>"
         "On the previous page you calculated how much Te recycling can recover. "
         "That calculation assumed ideal conditions. "
@@ -2096,7 +2093,7 @@ elif page == "⚠️ Circularity Reality Check":
     st.markdown(
         f"<div style='background:#fff8e1;border-left:5px solid #f57f17;"
         f"padding:12px 16px;border-radius:6px;font-size:13px;margin-top:8px;'>"
-        f"💡 <b>Think about this:</b> Your optimistic recycling scenario recovers "
+        f"<b>Think about this:</b> Your optimistic recycling scenario recovers "
         f"<b>{_best:,.1f} t/yr</b> by {_ey}. "
         f"Under the most stressed condition, that drops to <b>{_worst:,.1f} t/yr</b> — "
         f"a reduction of <b>{(1 - _worst/max(_best,0.001))*100:.0f}%</b>. "
@@ -2177,7 +2174,7 @@ elif page == "⚠️ Circularity Reality Check":
     _fig_time.add_shape(type="rect", x0=2030, y0=1.4, x1=2045, y1=2.2,
                         fillcolor="#ffcdd2", line_color="#c62828", line_width=1.5)
     _fig_time.add_annotation(x=2037.5, y=1.8,
-                             text="⚠️ <b>Shortage window</b> (Te demand 7× by 2040)",
+                             text="<b>Shortage window</b> (Te demand 7× by 2040)",
                              showarrow=False, font=dict(size=10, color="#c62828"),
                              xref="x", yref="y")
 
@@ -2186,10 +2183,10 @@ elif page == "⚠️ Circularity Reality Check":
     _fig_time.add_annotation(
         x=2048, y=3.0,
         text=(
-            f"✅ Recycled Te arrives in {_retire_yr}<br>"
+            f"Recycled Te arrives in {_retire_yr}<br>"
             f"Overlaps shortage window"
             if _overlap else
-            f"❌ Recycled Te arrives in {_retire_yr}<br>"
+            f"Recycled Te arrives in {_retire_yr}<br>"
             f"Too late for shortage window"
         ),
         showarrow=False,
@@ -2216,7 +2213,7 @@ elif page == "⚠️ Circularity Reality Check":
         st.markdown(
             f"<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
             f"padding:10px 14px;border-radius:6px;font-size:13px;'>"
-            f"✅ With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
+            f"With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
             f"within the shortage window. Recycling can contribute to closing the gap in time.</div>",
             unsafe_allow_html=True,
         )
@@ -2224,7 +2221,7 @@ elif page == "⚠️ Circularity Reality Check":
         st.markdown(
             f"<div style='background:#ffebee;border-left:5px solid #c62828;"
             f"padding:10px 14px;border-radius:6px;font-size:13px;'>"
-            f"⚠️ With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
+            f"With a {_lt_sel}-year lifetime, panels installed in 2025 retire in {_retire_yr} — "
             f"<b>after the projected shortage window</b>. Recycling alone cannot address "
             f"the 2030s supply gap. Other strategies (friendshoring, substitution, Te stockpiling) "
             f"would be needed for that period.</div>",
@@ -2413,7 +2410,7 @@ elif page == "⚠️ Circularity Reality Check":
         st.markdown(
             "<div style='background:#e8f5e9;border-left:5px solid #2e7d32;"
             "padding:12px 16px;border-radius:6px;font-size:13px;'>"
-            "✅ <b>Your scenario meets all three conditions.</b> "
+            "<b>Your scenario meets all three conditions.</b> "
             "Circular economy is likely to be effective under your assumptions. "
             "Now consider: are those assumptions realistic for the actual US policy and "
             "technology landscape?</div>",
@@ -2430,7 +2427,7 @@ elif page == "⚠️ Circularity Reality Check":
         st.markdown(
             f"<div style='background:#fff3e0;border-left:5px solid #e65100;"
             f"padding:12px 16px;border-radius:6px;font-size:13px;'>"
-            f"⚠️ <b>Your scenario fails {len(_fails)} condition(s):</b> "
+            f"<b>Your scenario fails {len(_fails)} condition(s):</b> "
             f"{'; '.join(_fails)}. "
             f"This does not mean circularity is impossible — it means specific interventions "
             f"are needed before recycling can close the supply gap effectively.</div>",
@@ -2440,7 +2437,7 @@ elif page == "⚠️ Circularity Reality Check":
     st.markdown(
         "<div style='background:#1b5e20;padding:16px 22px;border-radius:10px;margin-top:16px;'>"
         "<p style='color:white;font-size:14px;font-weight:700;margin:0 0 6px 0;'>"
-        "🔑 Key insight</p>"
+        "Key insight</p>"
         "<p style='color:#e8f5e9;font-size:13px;line-height:1.8;margin:0;'>"
         "Circular economy is not a default solution — it is a <b>conditional strategy</b>. "
         "It requires simultaneous progress on policy (collection), infrastructure (timing), "

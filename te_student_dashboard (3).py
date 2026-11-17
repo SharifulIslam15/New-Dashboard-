@@ -6,7 +6,7 @@ import plotly.express as px
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Material Availability Dashboard",
+    page_title="Critical Materials for Solar: The Tellurium Case",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -142,7 +142,11 @@ for k, v in DEFAULTS.items():
         st.session_state[k] = v
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
-st.sidebar.title("Material Availability Dashboard")
+st.sidebar.title("Critical Materials for Solar")
+st.sidebar.markdown(
+    "<div style='color:#2e7d32;font-size:15px;font-weight:600;margin-top:-10px;'>The Tellurium Case</div>",
+    unsafe_allow_html=True,
+)
 st.sidebar.divider()
 
 PAGES = [
@@ -193,9 +197,9 @@ if page == "🏠 Welcome":
     with col_a:
         st.markdown(
             "<h1 style='color:#1b5e20;font-size:32px;margin-bottom:4px;'>"
-            "Material Availability Dashboard</h1>"
+            "Critical Materials for Solar: The Tellurium Case</h1>"
             "<h3 style='color:#388e3c;font-weight:400;margin-top:0;'>"
-            "Tellurium (Te) for CdTe Solar</h3>",
+            "Supply, demand, and circular economy of tellurium in CdTe panels</h3>",
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -1844,7 +1848,7 @@ elif page == "🔍 Scenario Analysis":
 Student : {_name}
 ID      : {_sid}
 Period  : {_sy} – {_ey}
-Date    : Generated from Material Availability Dashboard
+Date    : Generated from Critical Materials for Solar: The Tellurium Case
 
 SCENARIO SUMMARY
 {'─'*40}
@@ -1873,7 +1877,7 @@ QUESTION 5 — STRESS-TESTING YOUR STRATEGY
 {st.session_state.get('pb_stress','') or '[Not answered]'}
 
 {'='*62}
-Source: Material Availability Dashboard
+Source: Critical Materials for Solar: The Tellurium Case
 """
         _fname = f"ScenarioAnalysis_{_name.replace(' ','_')}_{_sy}_{_ey}.txt"
         st.download_button(

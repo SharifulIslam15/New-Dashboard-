@@ -71,8 +71,13 @@ def info_box(text: str):
     )
 
 def go_to_page(name: str):
-    """Save target page to session state and rerun — sidebar selectbox will follow."""
-    st.session_state["_current_page"] = name
+    """Ask for a page change and rerun.
+
+    The sidebar dropdown is already drawn when a page button is clicked, and Streamlit does
+    not allow changing a widget after it is drawn. So the target waits in "_goto" and is
+    applied at the top of the next run, before the dropdown is created.
+    """
+    st.session_state["_goto"] = name
     st.rerun()
 
 def formula_box(title: str, formula: str, example: str = ""):
@@ -153,12 +158,16 @@ PAGES = [
     "🔍 Scenario Analysis",
 ]
 
-# Session-state-driven navigation so go_to_page() works instantly
-_idx = PAGES.index(st.session_state["_current_page"]) if st.session_state["_current_page"] in PAGES else 0
-page = st.sidebar.selectbox("Navigate to", PAGES, index=_idx, key="_nav_select")
-# Sync back if user manually clicks sidebar
-if page != st.session_state["_current_page"]:
-    st.session_state["_current_page"] = page
+# The dropdown's own value ("_nav_select") is the single source of truth for the page.
+# A page button's request (see go_to_page) is applied here, before the dropdown is drawn.
+if "_goto" in st.session_state:
+    st.session_state["_nav_select"] = st.session_state.pop("_goto")
+elif "_nav_select" not in st.session_state:
+    st.session_state["_nav_select"] = st.session_state["_current_page"]
+if st.session_state["_nav_select"] not in PAGES:
+    st.session_state["_nav_select"] = PAGES[0]
+page = st.sidebar.selectbox("Navigate to", PAGES, key="_nav_select")
+st.session_state["_current_page"] = page
 
 st.sidebar.divider()
 st.sidebar.markdown(
